@@ -57,6 +57,22 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define VBATT_Pin GPIO_PIN_7
+#define VBATT_GPIO_Port GPIOA
+#define DBG_LED1_BLUE_Pin GPIO_PIN_8
+#define DBG_LED1_BLUE_GPIO_Port GPIOE
+#define DBG_LED1_GREEN_Pin GPIO_PIN_9
+#define DBG_LED1_GREEN_GPIO_Port GPIOE
+#define DBG_LED1_RED_Pin GPIO_PIN_10
+#define DBG_LED1_RED_GPIO_Port GPIOE
+#define RR_WHEEL_S_Pin GPIO_PIN_0
+#define RR_WHEEL_S_GPIO_Port GPIOD
+#define RL_WHEEL_S_Pin GPIO_PIN_1
+#define RL_WHEEL_S_GPIO_Port GPIOD
+#define FR_WHEEL_S_Pin GPIO_PIN_3
+#define FR_WHEEL_S_GPIO_Port GPIOD
+#define FL_WHEEL_S_Pin GPIO_PIN_4
+#define FL_WHEEL_S_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
 

@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "adc.h"
 #include "can.h"
 #include "tim.h"
 #include "usart.h"
@@ -68,6 +69,7 @@ void MX_FREERTOS_Init(void);
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -93,6 +95,7 @@ int main(void)
   MX_CAN2_Init();
   MX_TIM12_Init();
   MX_USART2_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -100,13 +103,14 @@ int main(void)
   /* Init scheduler */
   osKernelInitialize();
 
-  /* Call init function for freertos objects (in freertos.c) */
+  /* Call init function for freertos objects (in cmsis_os2.c) */
   MX_FREERTOS_Init();
 
   /* Start scheduler */
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)

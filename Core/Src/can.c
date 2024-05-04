@@ -19,7 +19,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "can.h"
-#include "logger.h"
 
 /* USER CODE BEGIN 0 */
 #include <usart.h>
@@ -112,6 +111,11 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     GPIO_InitStruct.Alternate = GPIO_AF9_CAN2;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+    /* CAN2 interrupt Init */
+    HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
+    HAL_NVIC_SetPriority(CAN2_SCE_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(CAN2_SCE_IRQn);
   /* USER CODE BEGIN CAN2_MspInit 1 */
 
   /* USER CODE END CAN2_MspInit 1 */
@@ -136,6 +140,9 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
     */
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_5|GPIO_PIN_6);
 
+    /* CAN2 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
+    HAL_NVIC_DisableIRQ(CAN2_SCE_IRQn);
   /* USER CODE BEGIN CAN2_MspDeInit 1 */
 
   /* USER CODE END CAN2_MspDeInit 1 */
