@@ -7,7 +7,7 @@
 //
 //***************************
 
-#include "IMU.h"
+#include "imu.h"
 #include "cmsis_os.h"
 
 #define BUFFER_SIZE 128
@@ -207,6 +207,6 @@ void StartImuCanProcTask(void *argument)
         // need to check if packet valid
         processAngularRatePacket(packet);
 
-        osDelay(500);
+        osThreadYield();
     }
 }
