@@ -47,7 +47,7 @@ extern CAN_HandleTypeDef hcan2;
 void MX_CAN2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-extern void StartCanRxTask(void *argument);
+
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

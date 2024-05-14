@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "can.h"
+#include "logger.h"
 
 /* USER CODE BEGIN 0 */
 #include <usart.h>
