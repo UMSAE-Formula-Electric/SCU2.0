@@ -1,9 +1,9 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    tim.h
+  * @file    rtc.h
   * @brief   This file contains all the function prototypes for
-  *          the tim.c file
+  *          the rtc.c file
   ******************************************************************************
   * @attention
   *
@@ -18,8 +18,8 @@
   */
 /* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __TIM_H__
-#define __TIM_H__
+#ifndef __RTC_H__
+#define __RTC_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,27 +32,22 @@ extern "C" {
 
 /* USER CODE END Includes */
 
-extern TIM_HandleTypeDef htim3;
-
-extern TIM_HandleTypeDef htim4;
-
-extern TIM_HandleTypeDef htim12;
+extern RTC_HandleTypeDef hrtc;
 
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
 
-void MX_TIM3_Init(void);
-void MX_TIM4_Init(void);
-void MX_TIM12_Init(void);
+void MX_RTC_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+char* get_time(void);
+char* get_date(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __TIM_H__ */
+#endif /* __RTC_H__ */
 

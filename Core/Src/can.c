@@ -19,19 +19,13 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "can.h"
-#include "logger.h"
 
 /* USER CODE BEGIN 0 */
-#include <usart.h>
 #include <string.h>
-#include <stdio.h>
-//#include "IMU.h"
+#include "logger.h"
+#include "imu.h"
+#include "cmsis_os2.h"
 
-CAN_RxHeaderTypeDef   RxHeader;
-uint8_t               RxData[8];
-
-CAN_TxHeaderTypeDef TxHeader;
-uint8_t TxData[8];
 uint32_t TxMailbox;
 
 /* USER CODE END 0 */
@@ -74,8 +68,8 @@ void MX_CAN2_Init(void)
     sFilterConfig.FilterIdLow = 0x0000;
     sFilterConfig.FilterMaskIdHigh = 0x0000;
     sFilterConfig.FilterMaskIdLow = 0x0000;
-    sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO1;
-    sFilterConfig.FilterActivation = ENABLE;
+    sFilterConfig.FilterFIFOAssignment = CAN_FILTER_FIFO1;
+    sFilterConfig.FilterActivation = CAN_FILTER_ENABLE;
 
     if(HAL_CAN_ConfigFilter(&hcan2, &sFilterConfig) != HAL_OK)
     {
@@ -112,6 +106,11 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     GPIO_InitStruct.Alternate = GPIO_AF9_CAN2;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+    /* CAN2 interrupt Init */
+    HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
+    HAL_NVIC_SetPriority(CAN2_SCE_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(CAN2_SCE_IRQn);
   /* USER CODE BEGIN CAN2_MspInit 1 */
 
   /* USER CODE END CAN2_MspInit 1 */
@@ -136,6 +135,9 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
     */
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_5|GPIO_PIN_6);
 
+    /* CAN2 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(CAN2_RX0_IRQn);
+    HAL_NVIC_DisableIRQ(CAN2_SCE_IRQn);
   /* USER CODE BEGIN CAN2_MspDeInit 1 */
 
   /* USER CODE END CAN2_MspDeInit 1 */
@@ -143,73 +145,70 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 }
 
 /* USER CODE BEGIN 1 */
-HAL_StatusTypeDef CAN_Polling(void)
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-    uint32_t isCanRxFifoFilled = HAL_CAN_GetRxFifoFillLevel(&hcan2, CAN_RX_FIFO1);
-    if (isCanRxFifoFilled < 1)
-    {
-        return HAL_ERROR;
-    }
+    CAN_RxPacketTypeDef rxPacket;
 
-    HAL_StatusTypeDef isCanMsgReceived = HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO1, &RxHeader, RxData);
-    if (isCanMsgReceived != HAL_OK)
-    {
-        return HAL_ERROR;
-    }
+    if (!(HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &(rxPacket.rxPacketHeader), rxPacket.rxPacketData) == HAL_OK &&
+          osMessageQueuePut(canRxPacketQueueHandle, &rxPacket, 0, 0) == osOK)) {
+        uint32_t currQueueSize = osMessageQueueGetCount(canRxPacketQueueHandle);
+        uint32_t maxQueueCapacity = osMessageQueueGetCapacity(canRxPacketQueueHandle);
 
-    return HAL_OK;
+        if (currQueueSize == maxQueueCapacity) {  /* Queue is full */
+            logMessage("Error adding received message to the CAN Rx queue because the queue is full.\r\n", true);
+        }
+        else {  /* Error receiving message from CAN */
+            logMessage("Error receiving message from the CAN Bus and adding it to the Rx queue.\r\n", true);
+        }
+        Error_Handler();
+    }
 }
 
-void messageReceivedFromControlUnit(const char *unitType) {
-    char canMsg[50];
-    if (strcmp(unitType, "VCU") == 0) strncpy(canMsg, "SCU received a CAN message from the VCU.\r\n", sizeof(canMsg) - 1);
-    else if (strcmp(unitType, "ACU") == 0) strncpy(canMsg, "SCU received a CAN message from the ACU.\r\n", sizeof(canMsg) - 1);
-    else if (strcmp(unitType, "SCU") == 0) strncpy(canMsg, "SCU received a CAN message from the SCU.\r\n", sizeof(canMsg) - 1);
+void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *hcan)
+{
+    logMessage("CAN Rx FIFO1 is full.\r\n", true);
+}
 
-    logMessage(canMsg, true);
+void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
+{
+    uint32_t canError = HAL_CAN_GetError(hcan);
+    if (canError != HAL_CAN_ERROR_NONE) {
+        logMessage("CAN ERROR CAN ERROR CAN ERROR!!\r\n", true);
+    }
 }
 
 void StartCanRxTask(void *argument)
 {
-//	imuState state;
-    char canMsg[50];
-    HAL_CAN_Start(&hcan2);
+    if (!(HAL_CAN_Start(&hcan2) == HAL_OK && HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING | CAN_IT_RX_FIFO1_OVERRUN | CAN_IT_RX_FIFO1_FULL | CAN_IT_ERROR) == HAL_OK))
+    {
+        Error_Handler();
+    }
+
+    CAN_RxPacketTypeDef rxPacket;
+    osStatus_t isMsgTakenFromQueue;
 
     for (;;)
     {
-        if (CAN_Polling() == HAL_OK)
+        isMsgTakenFromQueue = osMessageQueueGet(canRxPacketQueueHandle, &rxPacket, 0, 0);
+        if (isMsgTakenFromQueue == osOK)
         {
-            if (RxHeader.IDE == CAN_ID_EXT)
+            if (rxPacket.rxPacketHeader.IDE == CAN_ID_EXT)
             {
-                switch (RxHeader.ExtId)
+                switch (rxPacket.rxPacketHeader.ExtId)
                 {
                     case IMU_ACCELERATION_CAN_EXT_ID:
-//                        queueAccelerationPacket(RxData);
-//						imuProcessAccelerationPacket(&state, RxData);
-//						sprintf(canMsg, "IMU Acceleration Packet\r\n");
-//						HAL_USART_Transmit(&husart1, (uint8_t *) canMsg, strlen(canMsg)+1, 10);
+                        queueAccelerationPacket(rxPacket.rxPacketData);
                         break;
                     case IMU_ANGULAR_RATE_CAN_EXT_ID:
-//                        queueAngularRatePacket(RxData);
-//						imuProcessAngularRatePacket(&state, RxData);
-//						sprintf(canMsg, "IMU Angular Rate Packet\r\n");
-//						HAL_USART_Transmit(&husart1, (uint8_t *) canMsg, strlen(canMsg)+1, 10);
+                        queueAngularRatePacket(rxPacket.rxPacketData);
                         break;
                 }
             }
-            if (RxHeader.IDE == CAN_ID_STD)
+            if (rxPacket.rxPacketHeader.IDE == CAN_ID_STD)
             {
-                switch (RxHeader.StdId)
+                switch (rxPacket.rxPacketHeader.StdId)
                 {
-                    case CAN_VCU_CAN_ID:
-                        messageReceivedFromControlUnit("VCU");
-                        break;
-                    case CAN_ACU_CAN_ID:
-                        messageReceivedFromControlUnit("ACU");
-                        break;
-                    case CAN_SCU_CAN_ID:
-                        messageReceivedFromControlUnit("SCU");
-                        break;
+
                 }
             }
         }
@@ -217,28 +216,19 @@ void StartCanRxTask(void *argument)
 }
 
 void StartCanTxTask(void *argument){
-    char canMsg[50];
-    for(;;){
-        TxHeader.IDE = CAN_ID_STD; // Using Standard ID
-        TxHeader.StdId = CAN_VCU_CAN_ID;   // Transmitter's ID (11-bit wide)
-        TxHeader.RTR = CAN_RTR_DATA; // Data frame
-        TxHeader.DLC = 6; // Length of data bytes
-        TxData[0] = 'H'; // ASCII code for 'H'
-        TxData[1] = 'i'; // ASCII code for 'i'
-        TxData[2] = ' '; // ASCII code for space
-        TxData[3] = 'V'; // ASCII code for 'V'
-        TxData[4] = 'C'; // ASCII code for 'C'
-        TxData[5] = 'U'; // ASCII code for 'U'
+    CAN_TxPacketTypeDef txPacket;
+    osStatus_t isMsgTakenFromQueue;
 
-        if (HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox) != HAL_OK) {
-            strncpy(canMsg, "SCU couldn't send the message to the CAN Bus.\r\n", sizeof(canMsg) - 1);
-            logMessage(canMsg, true);
-        }
-        else {
-            strncpy(canMsg, "SCU sent  'Hi VCU' to the CAN Bus.\r\n", sizeof(canMsg) - 1);
-            logMessage(canMsg, true);
+    for(;;){
+        isMsgTakenFromQueue = osMessageQueueGet(canTxPacketQueueHandle, &txPacket, 0, 0);
+        if (isMsgTakenFromQueue == osOK) {
+            if (HAL_CAN_AddTxMessage(&hcan2, &(txPacket.txPacketHeader), txPacket.txPacketData, &TxMailbox) != HAL_OK) {
+                logMessage("SCU couldn't send a message to the CAN Bus.\r\n", true);
+            }
+            else {
+                logMessage("SCU sent a message to the CAN Bus.\r\n", true);
+            }
         }
     }
 }
-
 /* USER CODE END 1 */

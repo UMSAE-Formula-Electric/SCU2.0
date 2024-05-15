@@ -29,6 +29,7 @@
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
+typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -68,6 +69,63 @@ const osThreadAttr_t canTxTask_attributes = {
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for readAdcTask */
+osThreadId_t readAdcTaskHandle;
+uint32_t readAdcTaskBuffer[ 512 ];
+osStaticThreadDef_t readAdcTaskControlBlock;
+const osThreadAttr_t readAdcTask_attributes = {
+  .name = "readAdcTask",
+  .cb_mem = &readAdcTaskControlBlock,
+  .cb_size = sizeof(readAdcTaskControlBlock),
+  .stack_mem = &readAdcTaskBuffer[0],
+  .stack_size = sizeof(readAdcTaskBuffer),
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for readTempTask */
+osThreadId_t readTempTaskHandle;
+const osThreadAttr_t readTempTask_attributes = {
+  .name = "readTempTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for readShocksTask */
+osThreadId_t readShocksTaskHandle;
+const osThreadAttr_t readShocksTask_attributes = {
+  .name = "readShocksTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for readFlowTask */
+osThreadId_t readFlowTaskHandle;
+const osThreadAttr_t readFlowTask_attributes = {
+  .name = "readFlowTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for readSpeedsTask */
+osThreadId_t readSpeedsTaskHandle;
+const osThreadAttr_t readSpeedsTask_attributes = {
+  .name = "readSpeedsTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for imuCanProcTask */
+osThreadId_t imuCanProcTaskHandle;
+const osThreadAttr_t imuCanProcTask_attributes = {
+  .name = "imuCanProcTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for canRxPacketQueue */
+osMessageQueueId_t canRxPacketQueueHandle;
+const osMessageQueueAttr_t canRxPacketQueue_attributes = {
+  .name = "canRxPacketQueue"
+};
+/* Definitions for canTxPacketQueue */
+osMessageQueueId_t canTxPacketQueueHandle;
+const osMessageQueueAttr_t canTxPacketQueue_attributes = {
+  .name = "canTxPacketQueue"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -77,6 +135,12 @@ const osThreadAttr_t canTxTask_attributes = {
 void StartDefaultTask(void *argument);
 extern void StartCanRxTask(void *argument);
 extern void StartCanTxTask(void *argument);
+extern void StartReadAdcTask(void *argument);
+extern void StartReadTempTask(void *argument);
+extern void StartReadShocksTask(void *argument);
+extern void StartReadFlowTask(void *argument);
+extern void StartReadSpeedsTask(void *argument);
+extern void StartImuCanProcTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -102,6 +166,13 @@ void MX_FREERTOS_Init(void) {
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* creation of canRxPacketQueue */
+  canRxPacketQueueHandle = osMessageQueueNew (32, sizeof(CAN_RxPacketTypeDef), &canRxPacketQueue_attributes);
+
+  /* creation of canTxPacketQueue */
+  canTxPacketQueueHandle = osMessageQueueNew (32, sizeof(CAN_TxPacketTypeDef), &canTxPacketQueue_attributes);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
@@ -115,6 +186,24 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of canTxTask */
   canTxTaskHandle = osThreadNew(StartCanTxTask, NULL, &canTxTask_attributes);
+
+  /* creation of readAdcTask */
+  readAdcTaskHandle = osThreadNew(StartReadAdcTask, NULL, &readAdcTask_attributes);
+
+  /* creation of readTempTask */
+  readTempTaskHandle = osThreadNew(StartReadTempTask, NULL, &readTempTask_attributes);
+
+  /* creation of readShocksTask */
+  readShocksTaskHandle = osThreadNew(StartReadShocksTask, NULL, &readShocksTask_attributes);
+
+  /* creation of readFlowTask */
+  readFlowTaskHandle = osThreadNew(StartReadFlowTask, NULL, &readFlowTask_attributes);
+
+  /* creation of readSpeedsTask */
+  readSpeedsTaskHandle = osThreadNew(StartReadSpeedsTask, NULL, &readSpeedsTask_attributes);
+
+  /* creation of imuCanProcTask */
+  imuCanProcTaskHandle = osThreadNew(StartImuCanProcTask, NULL, &imuCanProcTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
