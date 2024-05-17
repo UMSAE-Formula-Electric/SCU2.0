@@ -116,6 +116,13 @@ const osThreadAttr_t imuCanProcTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for watchDogTask */
+osThreadId_t watchDogTaskHandle;
+const osThreadAttr_t watchDogTask_attributes = {
+  .name = "watchDogTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
+};
 /* Definitions for canRxPacketQueue */
 osMessageQueueId_t canRxPacketQueueHandle;
 const osMessageQueueAttr_t canRxPacketQueue_attributes = {
@@ -141,6 +148,7 @@ extern void StartReadShocksTask(void *argument);
 extern void StartReadFlowTask(void *argument);
 extern void StartReadSpeedsTask(void *argument);
 extern void StartImuCanProcTask(void *argument);
+extern void StartWatchDogTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -204,6 +212,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of imuCanProcTask */
   imuCanProcTaskHandle = osThreadNew(StartImuCanProcTask, NULL, &imuCanProcTask_attributes);
+
+  /* creation of watchDogTask */
+  watchDogTaskHandle = osThreadNew(StartWatchDogTask, (void*) WATCH_DOG_TASK_ENABLED, &watchDogTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
