@@ -192,28 +192,28 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  defaultTaskHandle = osThreadNew(StartDefaultTask, (void*) DEFAULT_TASK_ENABLED, &defaultTask_attributes);
 
   /* creation of canRxTask */
-  canRxTaskHandle = osThreadNew(StartCanRxTask, NULL, &canRxTask_attributes);
+  canRxTaskHandle = osThreadNew(StartCanRxTask, (void*) CAN_RX_TASK_ENABLED, &canRxTask_attributes);
 
   /* creation of canTxTask */
-  canTxTaskHandle = osThreadNew(StartCanTxTask, NULL, &canTxTask_attributes);
+  canTxTaskHandle = osThreadNew(StartCanTxTask, (void*) CAN_TX_TASK_ENABLED, &canTxTask_attributes);
 
   /* creation of readAdcTask */
-  readAdcTaskHandle = osThreadNew(StartReadAdcTask, NULL, &readAdcTask_attributes);
+  readAdcTaskHandle = osThreadNew(StartReadAdcTask, (void*) READ_ADC_TASK_ENABLED, &readAdcTask_attributes);
 
   /* creation of readTempTask */
-  readTempTaskHandle = osThreadNew(StartReadTempTask, NULL, &readTempTask_attributes);
+  readTempTaskHandle = osThreadNew(StartReadTempTask, (void*) READ_TEMP_TASK_ENABLED, &readTempTask_attributes);
 
   /* creation of readShocksTask */
-  readShocksTaskHandle = osThreadNew(StartReadShocksTask, NULL, &readShocksTask_attributes);
+  readShocksTaskHandle = osThreadNew(StartReadShocksTask, (void*) READ_SHOCKS_TASK_ENABLED, &readShocksTask_attributes);
 
   /* creation of readFlowTask */
-  readFlowTaskHandle = osThreadNew(StartReadFlowTask, NULL, &readFlowTask_attributes);
+  readFlowTaskHandle = osThreadNew(StartReadFlowTask, (void*) READ_FLOW_TASK_ENABLED, &readFlowTask_attributes);
 
   /* creation of readSpeedsTask */
-  readSpeedsTaskHandle = osThreadNew(StartReadSpeedsTask, NULL, &readSpeedsTask_attributes);
+  readSpeedsTaskHandle = osThreadNew(StartReadSpeedsTask, (void*) READ_SPEEDS_TASK_ENABLED, &readSpeedsTask_attributes);
 
   /* creation of imuCanProcTask */
   imuCanProcTaskHandle = osThreadNew(StartImuCanProcTask, (void*) IMU_CAN_PROC_TASK_ENABLED, &imuCanProcTask_attributes);

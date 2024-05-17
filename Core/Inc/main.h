@@ -57,6 +57,18 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define IWDG_EVENT_ALL_ALLOWED_BITS 0xFFFFFF
+#define IWDG_RELOAD_PERIOD 4094
+#define CAN_TX_TASK_ENABLED 1
+#define CAN_RX_TASK_ENABLED 1
+#define READ_ADC_TASK_ENABLED 1
+#define READ_TEMP_TASK_ENABLED 1
+#define READ_SHOCKS_TASK_ENABLED 1
+#define READ_FLOW_TASK_ENABLED 1
+#define READ_SPEEDS_TASK_ENABLED 1
+#define IMU_CAN_PROC_TASK_ENABLED 1
+#define DEFAULT_TASK_ENABLED 0
+#define WATCH_DOG_TASK_ENABLED 1
 #define VBATT_Pin GPIO_PIN_7
 #define VBATT_GPIO_Port GPIOA
 #define DBG_LED1_BLUE_Pin GPIO_PIN_8
