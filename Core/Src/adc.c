@@ -246,15 +246,18 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 
 void StartReadAdcTask(void *argument)
 {
-    /* USER CODE BEGIN StartDefaultTask */
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
     const int DELAY = 500;
-    /* Infinite loop */
+
     for(;;)
     {
         HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_Readings, adc_channel_count);
 
         osThreadYield();
     }
-    /* USER CODE END StartDefaultTask */
 }
 /* USER CODE END 1 */

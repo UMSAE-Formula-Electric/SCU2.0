@@ -116,6 +116,13 @@ const osThreadAttr_t imuCanProcTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for watchDogTask */
+osThreadId_t watchDogTaskHandle;
+const osThreadAttr_t watchDogTask_attributes = {
+  .name = "watchDogTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
+};
 /* Definitions for canRxPacketQueue */
 osMessageQueueId_t canRxPacketQueueHandle;
 const osMessageQueueAttr_t canRxPacketQueue_attributes = {
@@ -125,6 +132,11 @@ const osMessageQueueAttr_t canRxPacketQueue_attributes = {
 osMessageQueueId_t canTxPacketQueueHandle;
 const osMessageQueueAttr_t canTxPacketQueue_attributes = {
   .name = "canTxPacketQueue"
+};
+/* Definitions for iwdgEventGroup */
+osEventFlagsId_t iwdgEventGroupHandle;
+const osEventFlagsAttr_t iwdgEventGroup_attributes = {
+  .name = "iwdgEventGroup"
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -141,6 +153,7 @@ extern void StartReadShocksTask(void *argument);
 extern void StartReadFlowTask(void *argument);
 extern void StartReadSpeedsTask(void *argument);
 extern void StartImuCanProcTask(void *argument);
+extern void StartWatchDogTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -179,35 +192,42 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  defaultTaskHandle = osThreadNew(StartDefaultTask, (void*) DEFAULT_TASK_ENABLED, &defaultTask_attributes);
 
   /* creation of canRxTask */
-  canRxTaskHandle = osThreadNew(StartCanRxTask, NULL, &canRxTask_attributes);
+  canRxTaskHandle = osThreadNew(StartCanRxTask, (void*) CAN_RX_TASK_ENABLED, &canRxTask_attributes);
 
   /* creation of canTxTask */
-  canTxTaskHandle = osThreadNew(StartCanTxTask, NULL, &canTxTask_attributes);
+  canTxTaskHandle = osThreadNew(StartCanTxTask, (void*) CAN_TX_TASK_ENABLED, &canTxTask_attributes);
 
   /* creation of readAdcTask */
-  readAdcTaskHandle = osThreadNew(StartReadAdcTask, NULL, &readAdcTask_attributes);
+  readAdcTaskHandle = osThreadNew(StartReadAdcTask, (void*) READ_ADC_TASK_ENABLED, &readAdcTask_attributes);
 
   /* creation of readTempTask */
-  readTempTaskHandle = osThreadNew(StartReadTempTask, NULL, &readTempTask_attributes);
+  readTempTaskHandle = osThreadNew(StartReadTempTask, (void*) READ_TEMP_TASK_ENABLED, &readTempTask_attributes);
 
   /* creation of readShocksTask */
-  readShocksTaskHandle = osThreadNew(StartReadShocksTask, NULL, &readShocksTask_attributes);
+  readShocksTaskHandle = osThreadNew(StartReadShocksTask, (void*) READ_SHOCKS_TASK_ENABLED, &readShocksTask_attributes);
 
   /* creation of readFlowTask */
-  readFlowTaskHandle = osThreadNew(StartReadFlowTask, NULL, &readFlowTask_attributes);
+  readFlowTaskHandle = osThreadNew(StartReadFlowTask, (void*) READ_FLOW_TASK_ENABLED, &readFlowTask_attributes);
 
   /* creation of readSpeedsTask */
-  readSpeedsTaskHandle = osThreadNew(StartReadSpeedsTask, NULL, &readSpeedsTask_attributes);
+  readSpeedsTaskHandle = osThreadNew(StartReadSpeedsTask, (void*) READ_SPEEDS_TASK_ENABLED, &readSpeedsTask_attributes);
 
   /* creation of imuCanProcTask */
-  imuCanProcTaskHandle = osThreadNew(StartImuCanProcTask, NULL, &imuCanProcTask_attributes);
+  imuCanProcTaskHandle = osThreadNew(StartImuCanProcTask, (void*) IMU_CAN_PROC_TASK_ENABLED, &imuCanProcTask_attributes);
+
+  /* creation of watchDogTask */
+  watchDogTaskHandle = osThreadNew(StartWatchDogTask, (void*) WATCH_DOG_TASK_ENABLED, &watchDogTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* Create the event(s) */
+  /* creation of iwdgEventGroup */
+  iwdgEventGroupHandle = osEventFlagsNew(&iwdgEventGroup_attributes);
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
@@ -225,6 +245,10 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
   /* Infinite loop */
   for(;;)
   {

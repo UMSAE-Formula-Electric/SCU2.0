@@ -195,6 +195,11 @@ void printPacket(char *data_name, float x, float y, float z)
 
 void StartImuCanProcTask(void *argument)
 {
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
     uint64_t packet;
     for (;;)
     {

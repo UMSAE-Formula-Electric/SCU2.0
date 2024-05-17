@@ -32,6 +32,11 @@ double calculateWheelSpeed(int pulse_count){
 }
 
 extern void StartReadSpeedsTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
 	volatile double FL_speed;
 	volatile double FR_speed;
 
