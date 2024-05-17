@@ -133,6 +133,11 @@ osMessageQueueId_t canTxPacketQueueHandle;
 const osMessageQueueAttr_t canTxPacketQueue_attributes = {
   .name = "canTxPacketQueue"
 };
+/* Definitions for iwdgEventGroup */
+osEventFlagsId_t iwdgEventGroupHandle;
+const osEventFlagsAttr_t iwdgEventGroup_attributes = {
+  .name = "iwdgEventGroup"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -211,7 +216,7 @@ void MX_FREERTOS_Init(void) {
   readSpeedsTaskHandle = osThreadNew(StartReadSpeedsTask, NULL, &readSpeedsTask_attributes);
 
   /* creation of imuCanProcTask */
-  imuCanProcTaskHandle = osThreadNew(StartImuCanProcTask, NULL, &imuCanProcTask_attributes);
+  imuCanProcTaskHandle = osThreadNew(StartImuCanProcTask, (void*) IMU_CAN_PROC_TASK_ENABLED, &imuCanProcTask_attributes);
 
   /* creation of watchDogTask */
   watchDogTaskHandle = osThreadNew(StartWatchDogTask, (void*) WATCH_DOG_TASK_ENABLED, &watchDogTask_attributes);
@@ -219,6 +224,10 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* Create the event(s) */
+  /* creation of iwdgEventGroup */
+  iwdgEventGroupHandle = osEventFlagsNew(&iwdgEventGroup_attributes);
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
