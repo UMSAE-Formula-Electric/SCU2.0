@@ -46,6 +46,11 @@ double getTemperature(double voltageReading){		// USING STEINHART & HART EQUATIO
 }
 
 void StartReadTempTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
     char tempMsg[50];
     char* time;
 

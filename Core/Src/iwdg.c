@@ -186,6 +186,11 @@ bool areAllActiveTasksReady() {
  * @param argument the TASK_ENABLED value of the task used in freertos.c
  */
 void StartWatchDogTask(void *argument) {
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
     MX_IWDG_Init();
 
     bool allActiveTasksReady;

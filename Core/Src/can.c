@@ -179,6 +179,11 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
 
 void StartCanRxTask(void *argument)
 {
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
     if (!(HAL_CAN_Start(&hcan2) == HAL_OK && HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING | CAN_IT_RX_FIFO1_OVERRUN | CAN_IT_RX_FIFO1_FULL | CAN_IT_ERROR) == HAL_OK))
     {
         Error_Handler();
@@ -216,6 +221,11 @@ void StartCanRxTask(void *argument)
 }
 
 void StartCanTxTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
     CAN_TxPacketTypeDef txPacket;
     osStatus_t isMsgTakenFromQueue;
 

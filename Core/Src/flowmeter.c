@@ -34,6 +34,11 @@ double calculateFlowrate(){
 
 // calculates flowrate every DELAY ms
 void StartReadFlowTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
     volatile double flowrate;
     char tempMsg[50];
     char* time;

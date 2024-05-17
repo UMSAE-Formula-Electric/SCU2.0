@@ -45,6 +45,11 @@ double getDistanceFromVoltage(double voltage){
 //			translates voltages into distance
 //*********************************************************************
 void StartReadShocksTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
     char msg[512];
     char msgDist[20];
     double voltages[16];
