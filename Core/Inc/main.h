@@ -53,7 +53,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+#define SD_CARD_TASK_ENABLED 1 // idk why this isnt auto generated - TODO: ask tony
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -81,6 +81,8 @@ void Error_Handler(void);
 #define RR_WHEEL_S_GPIO_Port GPIOD
 #define RL_WHEEL_S_Pin GPIO_PIN_1
 #define RL_WHEEL_S_GPIO_Port GPIOD
+#define SD_CS_Pin GPIO_PIN_2
+#define SD_CS_GPIO_Port GPIOD
 #define FR_WHEEL_S_Pin GPIO_PIN_3
 #define FR_WHEEL_S_GPIO_Port GPIOD
 #define FL_WHEEL_S_Pin GPIO_PIN_4
@@ -88,6 +90,12 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 
+//#define SD_CD_Pin GPIO_PIN_2
+//#define SD_CD_GPIO_Port GPIOB
+//#define SD_CS_Pin GPIO_PIN_10
+//#define SD_CS_GPIO_Port GPIOB
+
+#define SD_SPI_HANDLE hspi3
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

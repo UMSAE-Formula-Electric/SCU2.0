@@ -26,6 +26,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "can.h"
+#include "sd_card.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -123,6 +124,13 @@ const osThreadAttr_t watchDogTask_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityHigh,
 };
+/* Definitions for sdCardTask */
+osThreadId_t sdCardTaskHandle;
+const osThreadAttr_t sdCardTask_attributes = {
+  .name = "sdCardTask",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for canRxPacketQueue */
 osMessageQueueId_t canRxPacketQueueHandle;
 const osMessageQueueAttr_t canRxPacketQueue_attributes = {
@@ -132,6 +140,11 @@ const osMessageQueueAttr_t canRxPacketQueue_attributes = {
 osMessageQueueId_t canTxPacketQueueHandle;
 const osMessageQueueAttr_t canTxPacketQueue_attributes = {
   .name = "canTxPacketQueue"
+};
+/* Definitions for sdCardQueue */
+osMessageQueueId_t sdCardQueueHandle;
+const osMessageQueueAttr_t sdCardQueue_attributes = {
+  .name = "sdCardQueue"
 };
 /* Definitions for iwdgEventGroup */
 osEventFlagsId_t iwdgEventGroupHandle;
@@ -154,6 +167,7 @@ extern void StartReadFlowTask(void *argument);
 extern void StartReadSpeedsTask(void *argument);
 extern void StartImuCanProcTask(void *argument);
 extern void StartWatchDogTask(void *argument);
+extern void StartSDCardTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -185,6 +199,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of canTxPacketQueue */
   canTxPacketQueueHandle = osMessageQueueNew (32, sizeof(CAN_TxPacketTypeDef), &canTxPacketQueue_attributes);
+
+  /* creation of sdCardQueue */
+  sdCardQueueHandle = osMessageQueueNew (32, sizeof(SDRequest), &sdCardQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -220,6 +237,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of watchDogTask */
   watchDogTaskHandle = osThreadNew(StartWatchDogTask, (void*) WATCH_DOG_TASK_ENABLED, &watchDogTask_attributes);
+
+  /* creation of sdCardTask */
+  sdCardTaskHandle = osThreadNew(StartSDCardTask, (void*) SD_CARD_TASK_ENABLED, &sdCardTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
