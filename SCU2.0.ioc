@@ -349,4 +349,3 @@ VP_SYS_VS_tim10.Mode=TIM10
 VP_SYS_VS_tim10.Signal=SYS_VS_tim10
 board=custom
 rtos.0.ip=FREERTOS
-isbadioc=false

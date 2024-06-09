@@ -28,11 +28,10 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "sd_card.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "sd_card.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
