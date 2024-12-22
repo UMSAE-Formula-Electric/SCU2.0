@@ -22,8 +22,10 @@
 
 /* USER CODE BEGIN 0 */
 #include "cmsis_os2.h"
-volatile uint32_t ADC_Readings[16];
-int adc_channel_count = sizeof(ADC_Readings)/sizeof(ADC_Readings[0]);
+//volatile uint32_t ADC_Readings[16];
+//int adc_channel_count = sizeof(ADC_Readings)/sizeof(ADC_Readings[0]);
+volatile uint32_t Sensor_DMABase[NUM_ADC_CHANNELS] = {0};
+
 volatile int newData_shock_pot;	// flag to determine if the ADC has finished a read
 volatile int newData_thermistor = 0;    // flag to determine if the ADC has finished a read
 const float V_DD = 3.3f;
@@ -50,17 +52,17 @@ void MX_ADC1_Init(void)
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4; // VCU uses DIV2
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = ENABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE; // Enabled on VCU
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 8;
-  hadc1.Init.DMAContinuousRequests = DISABLE;
-  hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
+  hadc1.Init.NbrOfConversion = 8; // VCU uses 3
+  hadc1.Init.DMAContinuousRequests = DISABLE; // Enabled on VCU
+  hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV; // Single CONV on VCU
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
@@ -139,7 +141,8 @@ void MX_ADC1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN ADC1_Init 2 */
-    HAL_ADC_Start(&hadc1);
+  HAL_ADC_MspInit(&hadc1);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*) Sensor_DMABase, NUM_ADC_CHANNELS);
 
   /* USER CODE END ADC1_Init 2 */
 
@@ -191,6 +194,9 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     hdma_adc1.Init.Mode = DMA_NORMAL;
     hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
     hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    //FIFO threshold?
+    // add memburst?
+    // add pburst?
     if (HAL_DMA_Init(&hdma_adc1) != HAL_OK)
     {
       Error_Handler();
@@ -244,6 +250,29 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     newData_shock_pot = 1;
 }
 
+/*
+ * ADC_get_val
+ *
+ * @Brief: This function is used to get a measured ADC value
+ * @Param item: The item to get. Should be one of @ADC Vals
+ * @Return: returns the most recent conversion of the given value. on failure returns 0
+ */
+uint32_t ADC_get_val(uint8_t item){
+  uint32_t retVal = INVALID_ADC_READING;
+  if(item < NUM_ADC_CHANNELS){// && HAL_DMA_PollForTransfer(&hdma_adc1, HAL_DMA_FULL_TRANSFER, 100)){
+    retVal = Sensor_DMABase[item];
+  }
+  return retVal;
+}
+
+// adc_convert() is for if you wanted one sample and
+// had something against the "nice" DMA I(bouchard) set up....
+uint32_t adc_convert(){
+  HAL_ADC_Start(&hadc1);//Start the conversion
+  while(!__HAL_ADC_GET_FLAG(&hadc1, ADC_FLAG_EOC));//Processing the conversion
+  return HAL_ADC_GetValue(&hadc1); //Return the converted data
+}
+
 void StartReadAdcTask(void *argument)
 {
     uint8_t isTaskActivated = (int)argument;
@@ -255,7 +284,7 @@ void StartReadAdcTask(void *argument)
 
     for(;;)
     {
-        HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_Readings, adc_channel_count);
+        //HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_Readings, adc_channel_count);
 
         osThreadYield();
     }

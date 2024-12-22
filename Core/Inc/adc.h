@@ -35,18 +35,28 @@ extern "C" {
 extern ADC_HandleTypeDef hadc1;
 
 /* USER CODE BEGIN Private defines */
-extern volatile uint32_t ADC_Readings[16];
-extern int adc_channel_count;
+//extern volatile uint32_t ADC_Readings[16];
+//extern int adc_channel_count;
 extern volatile int newData_thermistor;
 extern volatile int newData_shock_pot;	// flag to determine if the ADC has finished a read
 extern const float V_DD;
 extern const double ADC_TO_Voltage;
+
+// change these names after you understand the refactor better
+#define INVALID_ADC_READING 65535U
+
+enum ADC_CHANNEL{
+  ADC_APPS_LOW = 0,
+  ADC_APPS_HIGH,
+  ADC_VBATT,
+  NUM_ADC_CHANNELS
+};
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+  uint32_t ADC_get_val(uint8_t item);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
