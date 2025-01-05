@@ -17,7 +17,7 @@
 
 #define DELAY 500										// time in ms
 
-static const double conversionFactor = (1000/DELAY)*(1.0/1000.0);		// convert L/s to m^3/s
+static const double conversionFactor = (1000/DELAY);		// convert pulses to m/s
 
 extern volatile int wheel_FL_pulse_count;
 extern volatile int wheel_FR_pulse_count;
