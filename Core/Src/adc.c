@@ -19,9 +19,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "adc.h"
-#include "cmsis_os2.h"
 
 /* USER CODE BEGIN 0 */
+#include "cmsis_os2.h"
+//volatile uint32_t ADC_Readings[16];
+//int adc_channel_count = sizeof(ADC_Readings)/sizeof(ADC_Readings[0]);
 volatile uint32_t Sensor_DMABase[NUM_ADC_CHANNELS] = {0};
 
 volatile int newData_shock_pot;	// flag to determine if the ADC has finished a read
@@ -50,17 +52,17 @@ void MX_ADC1_Init(void)
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4; // VCU uses DIV2
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = ENABLE;
-  hadc1.Init.ContinuousConvMode = ENABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE; // Enabled on VCU
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 8; // VCU uses 3, but leave at 8 because we are using 8 channels?
-  hadc1.Init.DMAContinuousRequests = ENABLE;
-  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hadc1.Init.NbrOfConversion = 8; // VCU uses 3
+  hadc1.Init.DMAContinuousRequests = DISABLE; // Enabled on VCU
+  hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV; // Single CONV on VCU
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
