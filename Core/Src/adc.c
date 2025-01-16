@@ -22,8 +22,7 @@
 
 /* USER CODE BEGIN 0 */
 #include "cmsis_os2.h"
-//volatile uint32_t ADC_Readings[16];
-//int adc_channel_count = sizeof(ADC_Readings)/sizeof(ADC_Readings[0]);
+
 volatile uint32_t Sensor_DMABase[NUM_ADC_CHANNELS] = {0};
 
 volatile int newData_shock_pot;	// flag to determine if the ADC has finished a read

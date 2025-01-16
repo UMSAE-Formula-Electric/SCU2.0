@@ -35,8 +35,6 @@ extern "C" {
 extern ADC_HandleTypeDef hadc1;
 
 /* USER CODE BEGIN Private defines */
-//extern volatile uint32_t ADC_Readings[16];
-//extern int adc_channel_count;
 extern volatile int newData_thermistor;
 extern volatile int newData_shock_pot;	// flag to determine if the ADC has finished a read
 extern const float V_DD;
@@ -46,9 +44,14 @@ extern const double ADC_TO_Voltage;
 #define INVALID_ADC_READING 65535U
 
 enum ADC_CHANNEL{
-  ADC_APPS_LOW = 0,
-  ADC_APPS_HIGH,
-  ADC_VBATT,
+  FL_SHOCK_POTENTIOMETER = 0,
+  FR_SHOCK_POTENTIOMETER,
+  BL_SHOCK_POTENTIOMETER,
+  BR_SHOCK_POTENTIOMETER,
+  THERMISTOR_1,
+  THERMISTOR_2,
+  THERMISTOR_3,
+  THERMISTOR_4,
   NUM_ADC_CHANNELS
 };
 /* USER CODE END Private defines */
