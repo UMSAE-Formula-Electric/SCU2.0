@@ -20,8 +20,9 @@
 #include "cmsis_os2.h"
 
 // variables defined in thermistor.c
+const int NUM_SHOCK_POTS = 4;
 const float MAX_DIST = 50;	// max travel of shock potentiometer in mm
-volatile double dist[16];	// holds distances read from each ADC input (note: not all inputs are necessarily connected to a shock pot
+volatile double dist[NUM_SHOCK_POTS];	// holds distances read from each ADC input, each shock pot has its own ADC channel
 
 //*********************************************************************
 // getDistanceFromVoltage
@@ -52,14 +53,16 @@ void StartReadShocksTask(void *argument){
 
     char msg[512];
     char msgDist[20];
-    double voltages[16];
+    double voltages[NUM_SHOCK_POTS];
     char distMsg[50];
 
     for (;;){
         if (newData_shock_pot == 1){
             // calculate distances for each ADC channel
-            for(int i = 0; i < 16; i++) {
-                voltages[i] = ADC_TO_Voltage * ADC_Readings[i];
+            /* Same coding practice as the for loop in thermistor.c, maybe change if its easier to read?
+             * look at thermistor.c for explanation*/
+            for(int i = 0; i < NUM_SHOCK_POTS; i++) {
+                voltages[i] = ADC_TO_Voltage * ADC_get_val(i);
                 dist[i] = getDistanceFromVoltage(voltages[i]);
                 sprintf(msgDist, "ADC %d %.5f \n", i, voltages[i]);
                 strcat(msg,msgDist);

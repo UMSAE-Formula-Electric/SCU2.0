@@ -23,7 +23,8 @@ const double C = 1.3679771000E-7;
 // Conversion Variables
 const uint32_t constResistance = 1200;
 
-double volatile temperatures[16];
+const int NUM_TEMPERATURE_SENSORS = 4;
+double volatile temperatures[NUM_TEMPERATURE_SENSORS];
 double volatile naturalLogR;
 double volatile temperature;
 double volatile R_NTC;
@@ -56,10 +57,14 @@ void StartReadTempTask(void *argument){
 
     for (;;){
         if (newData_thermistor == 1) {
-            for(int i = 0; i < 16; i++) {
-                temperatures[i] = getTemperature(ADC_TO_Voltage * ADC_Readings[i]);
+            /* Can definitely be cleaned up, could use separate variables instead of temperature array
+             + for loop iterator. That way you could call ADC_get_val with the ADC enum defines.
+             Could run into problems with shock pot array indexes though */
+            for(int i = 0; i < NUM_TEMPERATURE_SENSORS; i++) {
+                temperatures[i] = getTemperature(ADC_TO_Voltage * ADC_get_val(i));
             }
 
+            // clean up temperature array calls with enum if that's easier to read
             /* TODO SCU#35 */
             /* Logging Starts */
             time = get_time();
@@ -77,9 +82,10 @@ void StartReadTempTask(void *argument){
             sprintf(tempMsg, "%f\r\n", temperatures[3]);
             HAL_USART_Transmit(&husart2, (uint8_t *) tempMsg, strlen(tempMsg), 10);
             /* Logging Ends */
+
+            newData_thermistor = 0;					// reset ADC conversion flag
         }
 
-        newData_thermistor = 0;
         osThreadYield();
     }
 }

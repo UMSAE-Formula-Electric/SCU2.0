@@ -35,7 +35,7 @@ extern "C" {
 extern ADC_HandleTypeDef hadc1;
 
 /* USER CODE BEGIN Private defines */
-extern volatile int newData_thermistor;
+extern volatile int newData_thermistor; // flag to determine if the ADC has finished a read
 extern volatile int newData_shock_pot;	// flag to determine if the ADC has finished a read
 extern const float V_DD;
 extern const double ADC_TO_Voltage;
