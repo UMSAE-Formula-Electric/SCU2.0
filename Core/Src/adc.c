@@ -272,20 +272,4 @@ uint32_t adc_convert(){
   return HAL_ADC_GetValue(&hadc1); //Return the converted data
 }
 
-void StartReadAdcTask(void *argument)
-{
-    uint8_t isTaskActivated = (int)argument;
-    if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
-    }
-
-    const int DELAY = 500;
-
-    for(;;)
-    {
-        //HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_Readings, adc_channel_count);
-
-        osThreadYield();
-    }
-}
 /* USER CODE END 1 */
