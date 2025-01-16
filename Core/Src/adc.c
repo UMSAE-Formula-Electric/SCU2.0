@@ -283,8 +283,7 @@ void StartReadAdcTask(void *argument)
     for(;;)
     {
         //HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_Readings, adc_channel_count);
-        // function not called in VCU and we don't use a task for a conversion either
-        // will remove the freertos task after talking with matt, and fix the interupt implementation (if needed)
+
         osThreadYield();
     }
 }
