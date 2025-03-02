@@ -19,10 +19,11 @@
 #include "task.h"
 #include "cmsis_os2.h"
 
-// variables defined in thermistor.c
-const int NUM_SHOCK_POTS = 4;
-const float MAX_DIST = 50;	// max travel of shock potentiometer in mm
-volatile double dist[NUM_SHOCK_POTS];	// holds distances read from each ADC input, each shock pot has its own ADC channel
+// variables defined in shock_pot.c
+#define NUM_SHOCK_POTS 4 // a define instead of a const int to prevent variably modified at file scope error
+
+const float MAX_DISTANCE = 50;	// max travel of shock potentiometer in mm
+volatile double distance[NUM_SHOCK_POTS];	// holds distances read from each ADC input, each shock pot has its own ADC channel
 
 //*********************************************************************
 // getDistanceFromVoltage
@@ -35,12 +36,30 @@ volatile double dist[NUM_SHOCK_POTS];	// holds distances read from each ADC inpu
 // RETURN:	distance in mm of type double
 //*********************************************************************
 double getDistanceFromVoltage(double voltage){
-	double distance = MAX_DIST * voltage / V_DD;
+	double distance = MAX_DISTANCE * voltage / V_DD;
 	return distance;
 }
 
 //*********************************************************************
-// readDist_task
+// readShockPotsVoltageFromADC
+//
+// PURPOSE: This function gets the shock pot voltage value from the ADC reading
+//
+// INPUT PARAMTERS:
+//			voltages - array to store the voltage readings from the ADC
+//
+// RETURN:	nothing - array is passed by reference
+//*********************************************************************
+void readShockPotsVoltageFromADC(double *voltages){
+	// calculate distances for each ADC channel connected to a shock pot
+	voltages[0] = ADC_TO_Voltage * ADC_get_val(FL_SHOCK_POTENTIOMETER);
+	voltages[1] = ADC_TO_Voltage * ADC_get_val(FR_SHOCK_POTENTIOMETER);
+	voltages[2] = ADC_TO_Voltage * ADC_get_val(BL_SHOCK_POTENTIOMETER);
+	voltages[3] = ADC_TO_Voltage * ADC_get_val(BR_SHOCK_POTENTIOMETER);
+}
+
+//*********************************************************************
+// StartReadShocksTask
 //
 // PURPOSE: Main loop for freeRTOS thread. Waits for ADC conversion and
 //			translates voltages into distance
@@ -51,28 +70,29 @@ void StartReadShocksTask(void *argument){
         osThreadTerminate(osThreadGetId());
     }
 
-    char msg[512];
-    char msgDist[20];
+    char concatenatedDistanceMessages[512];
+    char formattedDistanceMessage[20];
     double voltages[NUM_SHOCK_POTS];
-    char distMsg[50];
 
     for (;;){
         if (newData_shock_pot == 1){
-            // calculate distances for each ADC channel
-            /* Same coding practice as the for loop in thermistor.c, maybe change if its easier to read?
-             * look at thermistor.c for explanation*/
+
+            // Array of voltages passed by reference
+            readShockPotsVoltageFromADC(voltages);
+
             for(int i = 0; i < NUM_SHOCK_POTS; i++) {
-                voltages[i] = ADC_TO_Voltage * ADC_get_val(i);
-                dist[i] = getDistanceFromVoltage(voltages[i]);
-                sprintf(msgDist, "ADC %d %.5f \n", i, voltages[i]);
-                strcat(msg,msgDist);
+                distance[i] = getDistanceFromVoltage(voltages[i]);
+
+                /* TODO: correlate the index "i" with the correct physical ADC channel
+                 since the index may not align with the correct channel in the future */
+                sprintf(formattedDistanceMessage, "ADC %d %.5f \n", i, voltages[i]);
+                strcat(concatenatedDistanceMessages,formattedDistanceMessage);
+				sprintf(concatenatedDistanceMessages, "Distance: %f\r\n", distance[i]);
             }
 
             /* TODO SCU#35 */
             /* Logging Starts */
-            // add ADC channel 0 to message
-            sprintf(distMsg, "Distance: %f\r\n", dist[0]);
-            HAL_USART_Transmit(&husart2, (uint8_t *) distMsg, strlen(distMsg), 10);
+            HAL_USART_Transmit(&husart2, (uint8_t *) concatenatedDistanceMessages, strlen(concatenatedDistanceMessages), 10);
             /* Logging Ends */
 
             newData_shock_pot = 0;					// reset ADC conversion flag
