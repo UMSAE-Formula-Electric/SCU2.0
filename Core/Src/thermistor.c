@@ -23,7 +23,8 @@ const double C = 1.3679771000E-7;
 // Conversion Variables
 const uint32_t constResistance = 1200;
 
-const int NUM_TEMPERATURE_SENSORS = 4;
+#define NUM_TEMPERATURE_SENSORS 4 // a define instead of a const int to prevent variably modified at file scope error
+
 double volatile temperatures[NUM_TEMPERATURE_SENSORS];
 double volatile naturalLogR;
 double volatile temperature;
@@ -46,41 +47,57 @@ double getTemperature(double voltageReading){		// USING STEINHART & HART EQUATIO
     return temperature;
 }
 
+//*********************************************************************
+// readTemperatureSensorVoltageFromADC
+//
+// PURPOSE: This function gets the temperature sensor voltage value from the ADC reading
+//
+// INPUT PARAMTERS:
+//			voltages - array to store the voltage readings from the ADC
+//
+// RETURN:	nothing - array is passed by reference
+//*********************************************************************
+void readTemperatureSensorVoltageFromADC(double *voltages){
+	// calculate voltages for each ADC channel connected to a temperature sensor
+	voltages[0] = ADC_TO_Voltage * ADC_get_val(THERMISTOR_1);
+	voltages[1] = ADC_TO_Voltage * ADC_get_val(THERMISTOR_2);
+	voltages[2] = ADC_TO_Voltage * ADC_get_val(THERMISTOR_3);
+	voltages[3] = ADC_TO_Voltage * ADC_get_val(THERMISTOR_4);
+}
+
 void StartReadTempTask(void *argument){
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
         osThreadTerminate(osThreadGetId());
     }
 
-    char tempMsg[50];
+    char concatenatedTempMessages[1024]; // TODO: make sure we don't concatenate past msg size, look at strncat()
+    char formattedTempMessage[20];
     char* time;
+    double voltages[NUM_TEMPERATURE_SENSORS];
 
     for (;;){
         if (newData_thermistor == 1) {
-            /* Can definitely be cleaned up, could use separate variables instead of temperature array
-             + for loop iterator. That way you could call ADC_get_val with the ADC enum defines.
-             Could run into problems with shock pot array indexes though */
+
+            // Array of voltages passed by reference
+            readTemperatureSensorVoltageFromADC(voltages);
+
             for(int i = 0; i < NUM_TEMPERATURE_SENSORS; i++) {
-                temperatures[i] = getTemperature(ADC_TO_Voltage * ADC_get_val(i));
+                temperatures[i] = getTemperature(voltages[i]);
+
+                time = get_time();
+                strcat(concatenatedTempMessages,time);
+
+                /* TODO: correlate the index "i" with the correct physical ADC channel
+                 since the index may not align with the correct channel in the future */
+                sprintf(formattedTempMessage, "ADC %d %.5f \n", i, voltages[i]);
+                strcat(concatenatedTempMessages,formattedTempMessage);
+                sprintf(concatenatedTempMessages, "Temperature: %f\r\n", temperatures[i]);
             }
 
-            // clean up temperature array calls with enum if that's easier to read
             /* TODO SCU#35 */
             /* Logging Starts */
-            time = get_time();
-            HAL_USART_Transmit(&husart2, (uint8_t *) time, strlen(time), 10);
-
-            sprintf(tempMsg, ",,%f,", temperatures[0]);
-            HAL_USART_Transmit(&husart2, (uint8_t *) tempMsg, strlen(tempMsg), 10);
-
-            sprintf(tempMsg, "%f,", temperatures[1]);
-            HAL_USART_Transmit(&husart2, (uint8_t *) tempMsg, strlen(tempMsg), 10);
-
-            sprintf(tempMsg, "%f,", temperatures[2]);
-            HAL_USART_Transmit(&husart2, (uint8_t *) tempMsg, strlen(tempMsg), 10);
-
-            sprintf(tempMsg, "%f\r\n", temperatures[3]);
-            HAL_USART_Transmit(&husart2, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+            HAL_USART_Transmit(&husart2, (uint8_t *) concatenatedTempMessages, strlen(concatenatedTempMessages), 10);
             /* Logging Ends */
 
             newData_thermistor = 0;					// reset ADC conversion flag
