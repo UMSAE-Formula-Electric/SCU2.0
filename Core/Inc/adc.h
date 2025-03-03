@@ -40,18 +40,19 @@ extern volatile int newData_shock_pot;	// flag to determine if the ADC has finis
 extern const float V_DD;
 extern const double ADC_TO_Voltage;
 
-// change these names after you understand the refactor better
 #define INVALID_ADC_READING 65535U
 
+/* TODO: talk with sparkies and change MC back/front labeling to IN/OUT
+ * naming scheme following the microcontroller pinout*/
 enum ADC_CHANNEL{
   FL_SHOCK_POTENTIOMETER = 0,
   FR_SHOCK_POTENTIOMETER,
   BL_SHOCK_POTENTIOMETER,
   BR_SHOCK_POTENTIOMETER,
-  THERMISTOR_1,
-  THERMISTOR_2,
-  THERMISTOR_3,
-  THERMISTOR_4,
+  MOTOR_FRONT_THERMISTOR,
+  MOTOR_BACK_THERMISTOR,
+  MOTOR_CONTROLLER_FRONT_THERMISTOR,
+  MOTOR_CONTROLLER_BACK_THERMISTOR,
   NUM_ADC_CHANNELS
 };
 /* USER CODE END Private defines */
