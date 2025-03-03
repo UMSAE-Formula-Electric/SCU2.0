@@ -13,6 +13,7 @@
 #include "stdio.h"
 #include "adc.h"
 #include <usart.h>
+#include "rtc.h"
 #include <stdio.h>
 #include <string.h>
 #include "FreeRTOS.h"
@@ -70,8 +71,9 @@ void StartReadShocksTask(void *argument){
         osThreadTerminate(osThreadGetId());
     }
 
-    char concatenatedDistanceMessages[512];
+    char concatenatedDistanceMessages[1024]; // TODO: make sure we don't concatenate past msg size, look at strncat()
     char formattedDistanceMessage[20];
+    char* time;
     double voltages[NUM_SHOCK_POTS];
 
     for (;;){
@@ -82,6 +84,9 @@ void StartReadShocksTask(void *argument){
 
             for(int i = 0; i < NUM_SHOCK_POTS; i++) {
                 distance[i] = getDistanceFromVoltage(voltages[i]);
+
+                time = get_time();
+                strcat(concatenatedDistanceMessages,time);
 
                 /* TODO: correlate the index "i" with the correct physical ADC channel
                  since the index may not align with the correct channel in the future */

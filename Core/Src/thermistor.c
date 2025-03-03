@@ -59,10 +59,10 @@ double getTemperature(double voltageReading){		// USING STEINHART & HART EQUATIO
 //*********************************************************************
 void readTemperatureSensorVoltageFromADC(double *voltages){
 	// calculate voltages for each ADC channel connected to a temperature sensor
-	voltages[0] = ADC_TO_Voltage * ADC_get_val(THERMISTOR_1);
-	voltages[1] = ADC_TO_Voltage * ADC_get_val(THERMISTOR_2);
-	voltages[2] = ADC_TO_Voltage * ADC_get_val(THERMISTOR_3);
-	voltages[3] = ADC_TO_Voltage * ADC_get_val(THERMISTOR_4);
+	voltages[0] = ADC_TO_Voltage * ADC_get_val(MOTOR_FRONT_THERMISTOR);
+	voltages[1] = ADC_TO_Voltage * ADC_get_val(MOTOR_BACK_THERMISTOR);
+	voltages[2] = ADC_TO_Voltage * ADC_get_val(MOTOR_CONTROLLER_FRONT_THERMISTOR);
+	voltages[3] = ADC_TO_Voltage * ADC_get_val(MOTOR_CONTROLLER_BACK_THERMISTOR);
 }
 
 void StartReadTempTask(void *argument){
