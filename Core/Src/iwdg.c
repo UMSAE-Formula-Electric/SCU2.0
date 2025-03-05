@@ -87,7 +87,6 @@ TaskInfo* getTaskInfos(size_t* count) {
             {&defaultTaskHandle, DEFAULT_TASK_ENABLED},
             {&canTxTaskHandle, CAN_TX_TASK_ENABLED},
             {&canRxTaskHandle, CAN_RX_TASK_ENABLED},
-            {&readAdcTaskHandle, READ_ADC_TASK_ENABLED},
             {&readTempTaskHandle, READ_TEMP_TASK_ENABLED},
             {&readShocksTaskHandle, READ_SHOCKS_TASK_ENABLED},
             {&readFlowTaskHandle, READ_FLOW_TASK_ENABLED},

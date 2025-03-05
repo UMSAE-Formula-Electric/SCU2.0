@@ -29,7 +29,6 @@
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
-typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -67,18 +66,6 @@ osThreadId_t canTxTaskHandle;
 const osThreadAttr_t canTxTask_attributes = {
   .name = "canTxTask",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for readAdcTask */
-osThreadId_t readAdcTaskHandle;
-uint32_t readAdcTaskBuffer[ 512 ];
-osStaticThreadDef_t readAdcTaskControlBlock;
-const osThreadAttr_t readAdcTask_attributes = {
-  .name = "readAdcTask",
-  .cb_mem = &readAdcTaskControlBlock,
-  .cb_size = sizeof(readAdcTaskControlBlock),
-  .stack_mem = &readAdcTaskBuffer[0],
-  .stack_size = sizeof(readAdcTaskBuffer),
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for readTempTask */
@@ -147,7 +134,6 @@ const osEventFlagsAttr_t iwdgEventGroup_attributes = {
 void StartDefaultTask(void *argument);
 extern void StartCanRxTask(void *argument);
 extern void StartCanTxTask(void *argument);
-extern void StartReadAdcTask(void *argument);
 extern void StartReadTempTask(void *argument);
 extern void StartReadShocksTask(void *argument);
 extern void StartReadFlowTask(void *argument);
@@ -199,9 +185,6 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of canTxTask */
   canTxTaskHandle = osThreadNew(StartCanTxTask, (void*) CAN_TX_TASK_ENABLED, &canTxTask_attributes);
-
-  /* creation of readAdcTask */
-  readAdcTaskHandle = osThreadNew(StartReadAdcTask, (void*) READ_ADC_TASK_ENABLED, &readAdcTask_attributes);
 
   /* creation of readTempTask */
   readTempTaskHandle = osThreadNew(StartReadTempTask, (void*) READ_TEMP_TASK_ENABLED, &readTempTask_attributes);
