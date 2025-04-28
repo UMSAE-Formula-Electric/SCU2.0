@@ -104,6 +104,8 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_USART_Transmit(&husart2, (uint8_t *) "Pin initialization complete.\r\n", strlen("Pin initialization complete.\r\n"), 10);
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
