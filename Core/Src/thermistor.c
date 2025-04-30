@@ -24,6 +24,7 @@ const double C = 1.3679771000E-7;
 const uint32_t constResistance = 1200;
 
 #define NUM_TEMPERATURE_SENSORS 4 // a define instead of a const int to prevent variably modified at file scope error
+#define THERMISTOR_DELAY_MS 15
 
 double volatile temperatures[NUM_TEMPERATURE_SENSORS];
 double volatile naturalLogR;
@@ -71,23 +72,24 @@ void StartReadTempTask(void *argument){
         osThreadTerminate(osThreadGetId());
     }
 
-    static char concatenatedTempMessages[256]; // TODO: make sure we don't concatenate past msg size, look at strncat()
+    char concatenatedTempMessages[256]; // TODO: make sure we don't concatenate past msg size, look at strncat()
     char* time;
-    static char* buffer_pos = concatenatedTempMessages;
+    char* buffer_pos = concatenatedTempMessages;
     double voltages[NUM_TEMPERATURE_SENSORS];
+    int written = 0;
 
     for (;;){
         if (newData_thermistor == 1) {
-            int written = 0;
+            written = 0;
             // Array of voltages passed by reference
             readTemperatureSensorVoltageFromADC(voltages);
 
             for(int i = 0; i < NUM_TEMPERATURE_SENSORS; i++) {
                 temperatures[i] = getTemperature(voltages[i]);
                 time = get_time();
-//                /* TODO: correlate the index "i" with the correct physical ADC channel
-//                 since the index may not align with the correct channel in the future */
-                int written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tTemperature: %f\r\n", time, i, voltages[i], temperatures[i]);
+               /* TODO: correlate the index "i" with the correct physical ADC channel
+                since the index may not align with the correct channel in the future */
+                written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tTemperature: %f\r\n", time, i, voltages[i], temperatures[i]);
                 buffer_pos += written;
 
             }
@@ -99,7 +101,7 @@ void StartReadTempTask(void *argument){
            buffer_pos = concatenatedTempMessages;
 
             newData_thermistor = 0;					// reset ADC conversion flag
-            osDelay(pdMS_TO_TICKS(5));
+            osDelay(pdMS_TO_TICKS(THERMISTOR_DELAY_MS));
         }
 
         osThreadYield();

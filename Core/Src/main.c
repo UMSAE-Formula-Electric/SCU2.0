@@ -26,6 +26,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "logger.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -104,7 +105,7 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_USART_Transmit(&husart2, (uint8_t *) "Pin initialization complete.\r\n", strlen("Pin initialization complete.\r\n"), 10);
+  logMessage("Pin initialization complete.\r\n",true);
 
   /* USER CODE END 2 */
 
