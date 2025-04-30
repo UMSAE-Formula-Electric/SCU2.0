@@ -22,6 +22,7 @@
 
 // variables defined in shock_pot.c
 #define NUM_SHOCK_POTS 4 // a define instead of a const int to prevent variably modified at file scope error
+#define SHOCK_POT_DELAY_MS 15
 
 const float MAX_DISTANCE = 50;	// max travel of shock potentiometer in mm
 volatile double distance[NUM_SHOCK_POTS];	// holds distances read from each ADC input, each shock pot has its own ADC channel
@@ -71,36 +72,34 @@ void StartReadShocksTask(void *argument){
         osThreadTerminate(osThreadGetId());
     }
 
-    char concatenatedDistanceMessages[1024]; // TODO: make sure we don't concatenate past msg size, look at strncat()
-    char formattedDistanceMessage[20];
+    char concatenatedDistanceMessages[256]; // TODO: make sure we don't concatenate past msg size, look at strncat()
     char* time;
+    char* buffer_pos = concatenatedDistanceMessages;
     double voltages[NUM_SHOCK_POTS];
+    int written = 0;
 
     for (;;){
         if (newData_shock_pot == 1){
-
             // Array of voltages passed by reference
             readShockPotsVoltageFromADC(voltages);
 
             for(int i = 0; i < NUM_SHOCK_POTS; i++) {
                 distance[i] = getDistanceFromVoltage(voltages[i]);
-
                 time = get_time();
-                strcat(concatenatedDistanceMessages,time);
-
-                /* TODO: correlate the index "i" with the correct physical ADC channel
-                 since the index may not align with the correct channel in the future */
-                sprintf(formattedDistanceMessage, "ADC %d %.5f \n", i, voltages[i]);
-                strcat(concatenatedDistanceMessages,formattedDistanceMessage);
-				sprintf(concatenatedDistanceMessages, "Distance: %f\r\n", distance[i]);
+               /* TODO: correlate the index "i" with the correct physical ADC channel
+                since the index may not align with the correct channel in the future */
+                written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tDistance: %f\r\n", time, i, voltages[i], distance[i]);
+                buffer_pos += written;
             }
 
             /* TODO SCU#35 */
             /* Logging Starts */
-            HAL_USART_Transmit(&husart2, (uint8_t *) concatenatedDistanceMessages, strlen(concatenatedDistanceMessages), 10);
+            HAL_USART_Transmit(&husart2, (uint8_t *) concatenatedDistanceMessages, buffer_pos-concatenatedDistanceMessages, 100);
             /* Logging Ends */
+            buffer_pos = concatenatedDistanceMessages;
 
             newData_shock_pot = 0;					// reset ADC conversion flag
+            osDelay(pdMS_TO_TICKS(SHOCK_POT_DELAY_MS));
         }
 
         osThreadYield();

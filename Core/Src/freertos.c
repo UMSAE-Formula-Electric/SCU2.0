@@ -22,6 +22,7 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
+#include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -243,5 +244,27 @@ void StartDefaultTask(void *argument)
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
+{
+    const char *msg = "Stack overflow detected in task: ";
+    const char *newline = "\r\n";
+
+    HAL_USART_Transmit(&husart2, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
+
+    if (pcTaskName != NULL)
+    {
+        HAL_USART_Transmit(&husart2, (uint8_t *)pcTaskName, strlen(pcTaskName), HAL_MAX_DELAY);
+    }
+    else
+    {
+        const char *unknown = "Unknown";
+        HAL_USART_Transmit(&husart2, (uint8_t *)unknown, strlen(unknown), HAL_MAX_DELAY);
+    }
+
+    HAL_USART_Transmit(&husart2, (uint8_t *)newline, strlen(newline), HAL_MAX_DELAY);
+
+    taskDISABLE_INTERRUPTS();
+    for(;;);
+}
 /* USER CODE END Application */
 
