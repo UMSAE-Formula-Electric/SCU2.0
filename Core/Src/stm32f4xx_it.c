@@ -22,6 +22,7 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,6 +62,51 @@ extern TIM_HandleTypeDef htim12;
 extern TIM_HandleTypeDef htim10;
 
 /* USER CODE BEGIN EV */
+void prvGetRegistersFromStack( uint32_t *pulFaultStackAddress )
+{
+	/* These are volatile to try and prevent the compiler/linker optimising them
+	   away as the variables never actually get used. If the debugger won't show the
+	   values of the variables, make them global my moving their declaration outside
+	   of this function. */
+	volatile uint32_t r0;
+	volatile uint32_t r1;
+	volatile uint32_t r2;
+	volatile uint32_t r3;
+	volatile uint32_t r12;
+	volatile uint32_t lr; /* Link register. */
+	volatile uint32_t pc; /* Program counter. */
+	volatile uint32_t psr;/* Program status register. */
+
+		r0 = pulFaultStackAddress[ 0 ];
+		r1 = pulFaultStackAddress[ 1 ];
+		r2 = pulFaultStackAddress[ 2 ];
+		r3 = pulFaultStackAddress[ 3 ];
+
+		r12 = pulFaultStackAddress[ 4 ];
+		lr = pulFaultStackAddress[ 5 ];
+		pc = pulFaultStackAddress[ 6 ];
+		psr = pulFaultStackAddress[ 7 ];
+
+	    /* Buffer to store the formatted output */
+	    char buffer[512];
+	    int len = snprintf(buffer, sizeof(buffer),
+	                       "Hard fault detected!\r\n"
+	                       "r0:  0x%08lx\r\n"
+	                       "r1:  0x%08lx\r\n"
+	                       "r2:  0x%08lx\r\n"
+	                       "r3:  0x%08lx\r\n"
+	                       "r12: 0x%08lx\r\n"
+	                       "lr:  0x%08lx\r\n"
+	                       "pc:  0x%08lx\r\n"
+	                       "psr: 0x%08lx\r\n",
+	                       r0, r1, r2, r3, r12, lr, pc, psr);
+
+	    /* Transmit the buffer over USART */
+	    HAL_USART_Transmit(&husart2, (uint8_t *)buffer, len, HAL_MAX_DELAY);
+/* When the following line is hit, the variables contain the register values. */
+		for( ;; );
+}
+
 
 /* USER CODE END EV */
 
@@ -88,13 +134,34 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
-  /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+	    __asm volatile
+
+	    (
+
+	        " tst lr, #4                                                \n"
+
+	        " ite eq                                                    \n"
+
+	        " mrseq r0, msp                                             \n"
+
+	        " mrsne r0, psp                                             \n"
+
+	        " ldr r1, [r0, #24]                                         \n"
+
+	        " ldr r2, handler2_address_const                            \n"
+
+	        " bx r2                                                     \n"
+
+	        " handler2_address_const: .word prvGetRegistersFromStack    \n"
+
+	    );
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
+  /* USER CODE END HardFault_IRQn 0 */
+
 }
 
 /**
