@@ -101,8 +101,13 @@ int main(void)
   MX_ADC1_Init();
   MX_RTC_Init();
   MX_TIM3_Init();
-  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_4);
+
+  HAL_TIM_IC_Start_IT(&htim12, TIM_CHANNEL_1);
 
   /* USER CODE END 2 */
 

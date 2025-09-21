@@ -21,6 +21,8 @@ static const double conversionFactor = (1000/DELAY);		// convert pulses to m/s
 
 extern volatile int wheel_FL_pulse_count;
 extern volatile int wheel_FR_pulse_count;
+extern volatile int wheel_RL_pulse_count;
+extern volatile int wheel_RR_pulse_count;
 
 // gets wheel speeds as m/s
 double calculateWheelSpeed(int pulse_count){
@@ -39,6 +41,8 @@ extern void StartReadSpeedsTask(void *argument){
 
 	volatile double FL_speed;
 	volatile double FR_speed;
+	volatile double RL_speed;
+	volatile double RR_speed;
 
 	for (;;){
 		osDelay(pdMS_TO_TICKS(DELAY));	// wait DELAY ms
@@ -46,6 +50,8 @@ extern void StartReadSpeedsTask(void *argument){
 		// calculates wheel speeds
 		FL_speed = calculateWheelSpeed(wheel_FL_pulse_count);
 		FR_speed = calculateWheelSpeed(wheel_FR_pulse_count);
+		RL_speed = calculateWheelSpeed(wheel_RL_pulse_count);
+		RR_speed = calculateWheelSpeed(wheel_RR_pulse_count);
 
 		/* TODO SCU#35 */
 		/* Logging Starts */
@@ -55,5 +61,7 @@ extern void StartReadSpeedsTask(void *argument){
 		// reset counts
 		wheel_FL_pulse_count = 0;
 		wheel_FR_pulse_count = 0;
+		wheel_RL_pulse_count = 0;
+		wheel_RR_pulse_count = 0;
 	}
 }
