@@ -1,10 +1,11 @@
-/*
- * thermistor.c
- *
- *  Created on: Aug 6, 2022
- *  Updated on: May 21, 2023
- *      Author: tonyz
- */
+//********************************************************************
+//
+//	@file 		thermistor.c
+//	@author 	Evan Mack
+//	@created	Nov 25, 2025
+//	@brief		Calculates temperature
+//
+//*********************************************************************
 #include "thermistor.h"
 #include "math.h"
 #include "stdio.h"
@@ -21,10 +22,9 @@ const double B = 2.6408831422E-4;
 const double C = 1.3679771000E-7;
 
 // Conversion Variables
-const uint32_t constResistance = 1200;
+const uint32_t constResistance = 2000; //TODO: Change to 10k ohm to match electrical schematic
 
 #define NUM_TEMPERATURE_SENSORS 4 // a define instead of a const int to prevent variably modified at file scope error
-#define THERMISTOR_DELAY_MS 15
 
 double volatile temperatures[NUM_TEMPERATURE_SENSORS];
 double volatile naturalLogR;
@@ -34,7 +34,8 @@ double volatile R_NTC;
 // takes the input voltage and returns the resistance
 void get_NTC_Resistance(double voltageReading){
     if (voltageReading >= (V_DD - 0.1) || voltageReading <= 0){ R_NTC = 0;}
-    else {R_NTC = (V_DD / voltageReading - 1) * constResistance;}
+    //else {R_NTC = (V_DD / voltageReading - 1) * constResistance;}
+    else {R_NTC = (voltageReading / (V_DD - voltageReading)) * constResistance;}
 }
 
 // takes the input voltage and returns the temperature
@@ -60,38 +61,42 @@ double getTemperature(double voltageReading){		// USING STEINHART & HART EQUATIO
 //*********************************************************************
 void readTemperatureSensorVoltageFromADC(double *voltages){
 	// calculate voltages for each ADC channel connected to a temperature sensor
-	voltages[0] = ADC_TO_Voltage * ADC_get_val(MOTOR_FRONT_THERMISTOR);
+	voltages[0] = ADC_TO_Voltage * ADC_get_val(MOTOR_FRONT_THERMISTOR); //Pin A5
 	voltages[1] = ADC_TO_Voltage * ADC_get_val(MOTOR_BACK_THERMISTOR);
 	voltages[2] = ADC_TO_Voltage * ADC_get_val(MOTOR_CONTROLLER_FRONT_THERMISTOR);
 	voltages[3] = ADC_TO_Voltage * ADC_get_val(MOTOR_CONTROLLER_BACK_THERMISTOR);
 }
-
+//*********************************************************************
+// StartReadShocksTask
+//
+// PURPOSE: Main loop for freeRTOS thread. Waits for ADC conversion and
+//			translates voltages into temperature
+//*********************************************************************
 void StartReadTempTask(void *argument){
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
         osThreadTerminate(osThreadGetId());
     }
 
-    char concatenatedTempMessages[256]; // TODO: make sure we don't concatenate past msg size, look at strncat()
+    static char concatenatedTempMessages[256]; // TODO: make sure we don't concatenate past msg size, look at strncat()
     char* time;
-    char* buffer_pos = concatenatedTempMessages;
+    static char* buffer_pos = concatenatedTempMessages;
     double voltages[NUM_TEMPERATURE_SENSORS];
-    int written = 0;
 
     for (;;){
         if (newData_thermistor == 1) {
-            written = 0;
+            int written = 0;
             // Array of voltages passed by reference
             readTemperatureSensorVoltageFromADC(voltages);
 
-            for(int i = 0; i < NUM_TEMPERATURE_SENSORS; i++) {
+            for(int i = 0; i < 1; i++) { //NUM_TEMPERATURE_SENSORS (only testing one)
                 temperatures[i] = getTemperature(voltages[i]);
                 time = get_time();
-               /* TODO: correlate the index "i" with the correct physical ADC channel
-                since the index may not align with the correct channel in the future */
-                written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tTemperature: %f\r\n", time, i, voltages[i], temperatures[i]);
+//                /* TODO: correlate the index "i" with the correct physical ADC channel
+//                 since the index may not align with the correct channel in the future */
+                int written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tTemperature: %f\r\n", time, i, voltages[i], temperatures[i]);
                 buffer_pos += written;
-
+                vTaskDelay(pdMS_TO_TICKS(250));  // Delay for 1000 ms
             }
 
             /* TODO SCU#35 */
@@ -100,10 +105,10 @@ void StartReadTempTask(void *argument){
             /* Logging Ends */
            buffer_pos = concatenatedTempMessages;
 
-            newData_thermistor = 0;					// reset ADC conversion flag
-            osDelay(pdMS_TO_TICKS(THERMISTOR_DELAY_MS));
-        }
+           newData_thermistor = 0;					// reset ADC conversion flag
+           osDelay(pdMS_TO_TICKS(5));
+       }
 
-        osThreadYield();
-    }
+       osThreadYield();
+   }
 }
