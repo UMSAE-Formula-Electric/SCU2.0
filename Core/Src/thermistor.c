@@ -22,11 +22,12 @@ const double B = 2.6408831422E-4;
 const double C = 1.3679771000E-7;
 
 // Conversion Variables
-const uint32_t constResistance = 2000; //TODO: Change to 10k ohm to match electrical schematic
+const uint32_t constResistance = 10000; //TODO: Change to 10k ohm to match electrical schematic
 
 #define NUM_TEMPERATURE_SENSORS 4 // a define instead of a const int to prevent variably modified at file scope error
 
 double volatile temperatures[NUM_TEMPERATURE_SENSORS];
+double volatile temperatureVoltages[NUM_TEMPERATURE_SENSORS]; //Voltages across the thermistors
 double volatile naturalLogR;
 double volatile temperature;
 double volatile R_NTC;
@@ -34,7 +35,7 @@ double volatile R_NTC;
 // takes the input voltage and returns the resistance
 void get_NTC_Resistance(double voltageReading){
     if (voltageReading >= (V_DD - 0.1) || voltageReading <= 0){ R_NTC = 0;}
-    //else {R_NTC = (V_DD / voltageReading - 1) * constResistance;}
+
     else {R_NTC = (voltageReading / (V_DD - voltageReading)) * constResistance;}
 }
 
@@ -59,12 +60,12 @@ double getTemperature(double voltageReading){		// USING STEINHART & HART EQUATIO
 //
 // RETURN:	nothing - array is passed by reference
 //*********************************************************************
-void readTemperatureSensorVoltageFromADC(double *voltages){
+void readTemperatureSensorVoltageFromADC(double *temperatureVoltages){
 	// calculate voltages for each ADC channel connected to a temperature sensor
-	voltages[0] = ADC_TO_Voltage * ADC_get_val(MOTOR_FRONT_THERMISTOR); //Pin A5
-	voltages[1] = ADC_TO_Voltage * ADC_get_val(MOTOR_BACK_THERMISTOR);
-	voltages[2] = ADC_TO_Voltage * ADC_get_val(MOTOR_CONTROLLER_FRONT_THERMISTOR);
-	voltages[3] = ADC_TO_Voltage * ADC_get_val(MOTOR_CONTROLLER_BACK_THERMISTOR);
+	temperatureVoltages[0] = ADC_TO_Voltage * ADC_get_val(MOTOR_FRONT_THERMISTOR); //Pin PC0
+	temperatureVoltages[1] = ADC_TO_Voltage * ADC_get_val(MOTOR_BACK_THERMISTOR); //Pin PC1
+	temperatureVoltages[2] = ADC_TO_Voltage * ADC_get_val(MOTOR_CONTROLLER_FRONT_THERMISTOR);//Pin PC2
+	temperatureVoltages[3] = ADC_TO_Voltage * ADC_get_val(MOTOR_CONTROLLER_BACK_THERMISTOR);//Pin PC3
 }
 //*********************************************************************
 // StartReadShocksTask
@@ -81,22 +82,21 @@ void StartReadTempTask(void *argument){
     static char concatenatedTempMessages[256]; // TODO: make sure we don't concatenate past msg size, look at strncat()
     char* time;
     static char* buffer_pos = concatenatedTempMessages;
-    double voltages[NUM_TEMPERATURE_SENSORS];
 
     for (;;){
         if (newData_thermistor == 1) {
             int written = 0;
             // Array of voltages passed by reference
-            readTemperatureSensorVoltageFromADC(voltages);
+            readTemperatureSensorVoltageFromADC(temperatureVoltages);
 
-            for(int i = 0; i < 1; i++) { //NUM_TEMPERATURE_SENSORS (only testing one)
-                temperatures[i] = getTemperature(voltages[i]);
+            for(int i = 0; i < 4; i++) { //NUM_TEMPERATURE_SENSORS
+                temperatures[i] = getTemperature(temperatureVoltages[i]);
                 time = get_time();
 //                /* TODO: correlate the index "i" with the correct physical ADC channel
 //                 since the index may not align with the correct channel in the future */
-                int written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tTemperature: %f\r\n", time, i, voltages[i], temperatures[i]);
+                int written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tTemperature: %f\r\n", time, i, temperatureVoltages[i], temperatures[i]);
                 buffer_pos += written;
-                vTaskDelay(pdMS_TO_TICKS(250));  // Delay for 1000 ms
+
             }
 
             /* TODO SCU#35 */

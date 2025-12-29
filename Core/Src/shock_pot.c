@@ -25,6 +25,7 @@
 #define NUM_SHOCK_POTS 4 // a define instead of a const int to prevent variably modified at file scope error
 
 const float MAX_DISTANCE = 50;	// max travel of shock potentiometer in mm
+volatile double voltages[NUM_SHOCK_POTS];//Voltages of the shock potenitiometers
 volatile double distance[NUM_SHOCK_POTS];	// holds distances read from each ADC input, each shock pot has its own ADC channel
 
 //*********************************************************************
@@ -57,9 +58,9 @@ double getDistanceFromVoltage(double voltage){
 void readShockPotsVoltageFromADC(double *voltages){
 	// calculate distances for each ADC channel connected to a shock pot
 	voltages[0] = ADC_TO_Voltage * ADC_get_val(FL_SHOCK_POTENTIOMETER);//Pin A0
-	voltages[1] = ADC_TO_Voltage * ADC_get_val(FR_SHOCK_POTENTIOMETER);
-	voltages[2] = ADC_TO_Voltage * ADC_get_val(BL_SHOCK_POTENTIOMETER);
-	voltages[3] = ADC_TO_Voltage * ADC_get_val(BR_SHOCK_POTENTIOMETER);
+	voltages[1] = ADC_TO_Voltage * ADC_get_val(FR_SHOCK_POTENTIOMETER);// Pin A1
+	voltages[2] = ADC_TO_Voltage * ADC_get_val(BL_SHOCK_POTENTIOMETER);//Pin A5
+	voltages[3] = ADC_TO_Voltage * ADC_get_val(BR_SHOCK_POTENTIOMETER);//Pin A6
 }
 
 //*********************************************************************
@@ -78,8 +79,6 @@ void StartReadShocksTask(void *argument){
     char* time;
     static char* buffer_pos = concatenatedDistanceMessages;;
 
-    double voltages[NUM_SHOCK_POTS];
-
     for (;;){
         if (newData_shock_pot == 1){
             // Array of voltages passed by reference
@@ -88,14 +87,14 @@ void StartReadShocksTask(void *argument){
 
             readShockPotsVoltageFromADC(voltages);
 
-            for(int i = 0; i < 1; i++) {//NUM_SHOCK_POTS (We are only testing one right now)
+            for(int i = 0; i < 4; i++) {//NUM_SHOCK_POTS (We are only testing one right now)
                 distance[i] = getDistanceFromVoltage(voltages[i]);
                 time = get_time();
 //                /* TODO: correlate the index "i" with the correct physical ADC channel
 //                 since the index may not align with the correct channel in the future */
                 int written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tDistance: %f\r\n", time, i, voltages[i], distance[i]);
                 buffer_pos += written;
-                vTaskDelay(pdMS_TO_TICKS(100));  // Delay for 100 ms
+
             }
 
             /* TODO SCU#35 */
