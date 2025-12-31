@@ -40,7 +40,7 @@ void get_NTC_Resistance(double voltageReading){
 }
 
 // takes the input voltage and returns the temperature
-double getTemperature(double voltageReading){		// USING STEINHART & HART EQUATION
+double getTemperature(double voltageReading){		// USING STEINHART & HART EQUATIONS
     get_NTC_Resistance(voltageReading);
     if (R_NTC < 1){temperature = -1;}
     else{
