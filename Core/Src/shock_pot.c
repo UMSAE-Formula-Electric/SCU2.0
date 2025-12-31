@@ -7,7 +7,7 @@
 //
 //	@datasheet	https://drive.google.com/file/d/1g9wjH6BT5--y21_IYlu2G4MbX3KbiAo5/view?usp=share_link
 //	@sensor		3V3 Blue, Ground Brown, Yellow Voltage Read
-//  @dead zones	Electrical Stroke: 50mm, Mechanical Stroke: 55mm
+//  @range	Electrical Stroke: 50mm, Mechanical Stroke: 55mm
 //*********************************************************************
 
 #include "shock_pot.h"
@@ -25,7 +25,7 @@
 #define NUM_SHOCK_POTS 4 // a define instead of a const int to prevent variably modified at file scope error
 
 const float MAX_DISTANCE = 50;	// max travel of shock potentiometer in mm
-volatile double voltages[NUM_SHOCK_POTS];//Voltages of the shock potenitiometers
+volatile double voltages[NUM_SHOCK_POTS];//Voltages of the shock potentiometers
 volatile double distance[NUM_SHOCK_POTS];	// holds distances read from each ADC input, each shock pot has its own ADC channel
 
 //*********************************************************************
@@ -87,7 +87,7 @@ void StartReadShocksTask(void *argument){
 
             readShockPotsVoltageFromADC(voltages);
 
-            for(int i = 0; i < 4; i++) {//NUM_SHOCK_POTS (We are only testing one right now)
+            for(int i = 0; i < 4; i++) {//NUM_SHOCK_POTS
                 distance[i] = getDistanceFromVoltage(voltages[i]);
                 time = get_time();
 //                /* TODO: correlate the index "i" with the correct physical ADC channel
@@ -97,7 +97,6 @@ void StartReadShocksTask(void *argument){
 
             }
 
-            /* TODO SCU#35 */
             /* Logging Starts */
             HAL_USART_Transmit(&husart2, (uint8_t *) concatenatedDistanceMessages, buffer_pos-concatenatedDistanceMessages, 1000);
             /* Logging Ends */

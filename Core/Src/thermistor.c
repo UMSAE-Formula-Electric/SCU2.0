@@ -22,7 +22,7 @@ const double B = 2.6408831422E-4;
 const double C = 1.3679771000E-7;
 
 // Conversion Variables
-const uint32_t constResistance = 10000; //TODO: Change to 10k ohm to match electrical schematic
+const uint32_t constResistance = 10000;
 
 #define NUM_TEMPERATURE_SENSORS 4 // a define instead of a const int to prevent variably modified at file scope error
 
@@ -99,7 +99,6 @@ void StartReadTempTask(void *argument){
 
             }
 
-            /* TODO SCU#35 */
             /* Logging Starts */
            HAL_USART_Transmit(&husart2, (uint8_t *) concatenatedTempMessages, buffer_pos-concatenatedTempMessages, 1000);
             /* Logging Ends */
