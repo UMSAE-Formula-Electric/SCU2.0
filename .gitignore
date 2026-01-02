@@ -30,5 +30,3 @@ cmake-build-*
 .idea
 .settings
 
-#Metadata
-.metadata/

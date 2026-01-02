@@ -22,9 +22,11 @@ const double B = 2.6408831422E-4;
 const double C = 1.3679771000E-7;
 
 // Conversion Variables
-const uint32_t constResistance = 10000;
+/*TODO: May need to change this value in the future as it limits the range of the ADC*/
+const uint32_t TEMP_SENSOR_VOLTAGE_DIVIDER_RESISTOR = 10000; //ohms
 
 #define NUM_TEMPERATURE_SENSORS 4 // a define instead of a const int to prevent variably modified at file scope error
+#define THERMISTOR_DELAY_MS 5
 
 double volatile temperatures[NUM_TEMPERATURE_SENSORS];
 double volatile temperatureVoltages[NUM_TEMPERATURE_SENSORS]; //Voltages across the thermistors
@@ -36,7 +38,7 @@ double volatile R_NTC;
 void get_NTC_Resistance(double voltageReading){
     if (voltageReading >= (V_DD - 0.1) || voltageReading <= 0){ R_NTC = 0;}
 
-    else {R_NTC = (voltageReading / (V_DD - voltageReading)) * constResistance;}
+    else {R_NTC = (voltageReading / (V_DD - voltageReading)) * TEMP_SENSOR_VOLTAGE_DIVIDER_RESISTOR;}
 }
 
 // takes the input voltage and returns the temperature
@@ -89,7 +91,7 @@ void StartReadTempTask(void *argument){
             // Array of voltages passed by reference
             readTemperatureSensorVoltageFromADC(temperatureVoltages);
 
-            for(int i = 0; i < 4; i++) { //NUM_TEMPERATURE_SENSORS
+            for(int i = 0; i < NUM_TEMPERATURE_SENSORS ; i++) {
                 temperatures[i] = getTemperature(temperatureVoltages[i]);
                 time = get_time();
 //                /* TODO: correlate the index "i" with the correct physical ADC channel
@@ -105,7 +107,7 @@ void StartReadTempTask(void *argument){
            buffer_pos = concatenatedTempMessages;
 
            newData_thermistor = 0;					// reset ADC conversion flag
-           osDelay(pdMS_TO_TICKS(5));
+           osDelay(pdMS_TO_TICKS(THERMISTOR_DELAY_MS));
        }
 
        osThreadYield();

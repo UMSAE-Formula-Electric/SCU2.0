@@ -22,10 +22,11 @@
 #include "cmsis_os2.h"
 
 // variables defined in shock_pot.c
+#define SHOCK_POT_DELAY_MS 5
 #define NUM_SHOCK_POTS 4 // a define instead of a const int to prevent variably modified at file scope error
 
 const float MAX_DISTANCE = 50;	// max travel of shock potentiometer in mm
-volatile double voltages[NUM_SHOCK_POTS];//Voltages of the shock potentiometers
+volatile double potentiometerVoltages[NUM_SHOCK_POTS];//Voltages of the shock potentiometers
 volatile double distance[NUM_SHOCK_POTS];	// holds distances read from each ADC input, each shock pot has its own ADC channel
 
 //*********************************************************************
@@ -55,12 +56,12 @@ double getDistanceFromVoltage(double voltage){
 //
 // RETURN:	nothing - array is passed by reference
 //*********************************************************************
-void readShockPotsVoltageFromADC(double *voltages){
+void readShockPotsVoltageFromADC(double *potentiometerVoltages){
 	// calculate distances for each ADC channel connected to a shock pot
-	voltages[0] = ADC_TO_Voltage * ADC_get_val(FL_SHOCK_POTENTIOMETER);//Pin A0
-	voltages[1] = ADC_TO_Voltage * ADC_get_val(FR_SHOCK_POTENTIOMETER);// Pin A1
-	voltages[2] = ADC_TO_Voltage * ADC_get_val(BL_SHOCK_POTENTIOMETER);//Pin A5
-	voltages[3] = ADC_TO_Voltage * ADC_get_val(BR_SHOCK_POTENTIOMETER);//Pin A6
+	potentiometerVoltages[0] = ADC_TO_Voltage * ADC_get_val(FL_SHOCK_POTENTIOMETER);//Pin A0
+	potentiometerVoltages[1] = ADC_TO_Voltage * ADC_get_val(FR_SHOCK_POTENTIOMETER);// Pin A1
+	potentiometerVoltages[2] = ADC_TO_Voltage * ADC_get_val(BL_SHOCK_POTENTIOMETER);//Pin A5
+	potentiometerVoltages[3] = ADC_TO_Voltage * ADC_get_val(BR_SHOCK_POTENTIOMETER);//Pin A6
 }
 
 //*********************************************************************
@@ -85,14 +86,14 @@ void StartReadShocksTask(void *argument){
         	buffer_pos = concatenatedDistanceMessages;   // reset pointer
         	*buffer_pos = '\0';                          // clear buffer contents
 
-            readShockPotsVoltageFromADC(voltages);
+            readShockPotsVoltageFromADC(potentiometerVoltages);
 
-            for(int i = 0; i < 4; i++) {//NUM_SHOCK_POTS
-                distance[i] = getDistanceFromVoltage(voltages[i]);
+            for(int i = 0; i < NUM_SHOCK_POTS; i++) {
+                distance[i] = getDistanceFromVoltage(potentiometerVoltages[i]);
                 time = get_time();
 //                /* TODO: correlate the index "i" with the correct physical ADC channel
 //                 since the index may not align with the correct channel in the future */
-                int written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tDistance: %f\r\n", time, i, voltages[i], distance[i]);
+                int written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tDistance: %f\r\n", time, i, potentiometerVoltages[i], distance[i]);
                 buffer_pos += written;
 
             }
@@ -103,7 +104,7 @@ void StartReadShocksTask(void *argument){
             buffer_pos = concatenatedDistanceMessages;
 
             newData_shock_pot = 0;					// reset ADC conversion flag
-            osDelay(pdMS_TO_TICKS(5));
+            osDelay(pdMS_TO_TICKS(SHOCK_POT_DELAY_MS));
         }
 
         osThreadYield();
