@@ -58,7 +58,7 @@
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_adc1;
 extern CAN_HandleTypeDef hcan2;
-extern TIM_HandleTypeDef htim12;
+extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim10;
 
 /* USER CODE BEGIN EV */
@@ -161,7 +161,32 @@ void HardFault_Handler(void)
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
   /* USER CODE END HardFault_IRQn 0 */
+  while (1)
+  {
+    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+	    __asm volatile
 
+	    (
+
+	        " tst lr, #4                                                \n"
+
+	        " ite eq                                                    \n"
+
+	        " mrseq r0, msp                                             \n"
+
+	        " mrsne r0, psp                                             \n"
+
+	        " ldr r1, [r0, #24]                                         \n"
+
+	        " ldr r2, handler2_address_const                            \n"
+
+	        " bx r2                                                     \n"
+
+	        " handler2_address_const: .word prvGetRegistersFromStack    \n"
+
+	    );
+    /* USER CODE END W1_HardFault_IRQn 0 */
+  }
 }
 
 /**
@@ -244,17 +269,17 @@ void TIM1_UP_TIM10_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles TIM8 break interrupt and TIM12 global interrupt.
+  * @brief This function handles TIM6 global interrupt and DAC1, DAC2 underrun error interrupts.
   */
-void TIM8_BRK_TIM12_IRQHandler(void)
+void TIM6_DAC_IRQHandler(void)
 {
-  /* USER CODE BEGIN TIM8_BRK_TIM12_IRQn 0 */
+  /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
 
-  /* USER CODE END TIM8_BRK_TIM12_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim12);
-  /* USER CODE BEGIN TIM8_BRK_TIM12_IRQn 1 */
+  /* USER CODE END TIM6_DAC_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim6);
+  /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
 
-  /* USER CODE END TIM8_BRK_TIM12_IRQn 1 */
+  /* USER CODE END TIM6_DAC_IRQn 1 */
 }
 
 /**
