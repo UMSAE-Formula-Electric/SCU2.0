@@ -12,5 +12,6 @@
 #ifndef _FLOWMETER
 #define _FLOWMETER
 
+void flowmeterTask(void);
 
 #endif // ifndef _FLOWMETER

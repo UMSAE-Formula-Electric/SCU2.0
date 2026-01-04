@@ -420,17 +420,5 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
         }
     }
 
-    // when interrupt is caused by timer 12
-    /*if(htim->Instance == TIM12)
-    {
-
-        ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
-
-        // check if timer is initialized
-        if(ICValue != 0)
-        {
-            flowmeter_pulse_count++;	// increment pulse_count
-        }
-    }*/
 }
 /* USER CODE END 1 */

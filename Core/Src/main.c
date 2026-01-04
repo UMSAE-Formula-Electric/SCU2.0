@@ -51,11 +51,6 @@
 
 /* USER CODE BEGIN PV */
 
-volatile int i = 0;
-volatile uint32_t flowmeter_pulse_count = 0;
-const int PPL = 2200;													// pulse per liter
-const int DELAY = 500;													// time in ms
-static const double conversionFactor = (1000/DELAY)*(1.0/1000.0);		// convert L/s to m^3/s
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -67,14 +62,7 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-double calculateFlowrate(){
-    volatile double flowrate;
 
-    flowrate = (double)flowmeter_pulse_count/(double)PPL;//*conversionFactor/PPL;	// calculate flowrate
-
-
-    return flowrate;
-}
 /* USER CODE END 0 */
 
 /**
@@ -118,13 +106,12 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   logMessage("Pin initialization complete.\r\n",true);
-
+  HAL_TIM_Base_Start_IT(&htim6);
+  HAL_TIM_Base_Start(&htim12);
   /* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();
-  HAL_TIM_Base_Start_IT(&htim6);
-  HAL_TIM_Base_Start(&htim12);
   /* Call init function for freertos objects (in cmsis_os2.c) */
   MX_FREERTOS_Init();
 
@@ -135,6 +122,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
   while (1)
   {
     /* USER CODE END WHILE */
@@ -207,25 +195,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM10) {
     HAL_IncTick();
   }
-  if (htim->Instance == TIM6) {
-  	//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-
-  	flowmeter_pulse_count = __HAL_TIM_GET_COUNTER(&htim12);
-      __HAL_TIM_SetCounter(&htim12, 0);
-
-  	char ms[50];
-      sprintf(ms, "Flowmeter pulse count %d: %lu \r\n",i, flowmeter_pulse_count);
-      HAL_USART_Transmit(&husart2, (uint8_t*)ms, strlen(ms), HAL_MAX_DELAY);
-
-  	float flowrate = (float)flowmeter_pulse_count/(float)PPL;
-
-      char msg[50];
-      sprintf(msg, "Flowrate %d: %.4f \r\n",i, flowrate);
-      HAL_USART_Transmit(&husart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-      i = i + 1;
-  }
   /* USER CODE BEGIN Callback 1 */
-
+  if (htim->Instance == TIM6) {
+	  flowmeterTask();
+  }
   /* USER CODE END Callback 1 */
 }
 
