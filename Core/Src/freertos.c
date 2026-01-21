@@ -83,13 +83,6 @@ const osThreadAttr_t readShocksTask_attributes = {
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for readSpeedsTask */
-osThreadId_t readSpeedsTaskHandle;
-const osThreadAttr_t readSpeedsTask_attributes = {
-  .name = "readSpeedsTask",
-  .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
 /* Definitions for imuCanProcTask */
 osThreadId_t imuCanProcTaskHandle;
 const osThreadAttr_t imuCanProcTask_attributes = {
@@ -130,7 +123,6 @@ extern void StartCanRxTask(void *argument);
 extern void StartCanTxTask(void *argument);
 extern void StartReadTempTask(void *argument);
 extern void StartReadShocksTask(void *argument);
-extern void StartReadSpeedsTask(void *argument);
 extern void StartImuCanProcTask(void *argument);
 extern void StartWatchDogTask(void *argument);
 
@@ -184,9 +176,6 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of readShocksTask */
   readShocksTaskHandle = osThreadNew(StartReadShocksTask, (void*) READ_SHOCKS_TASK_ENABLED, &readShocksTask_attributes);
-
-  /* creation of readSpeedsTask */
-  readSpeedsTaskHandle = osThreadNew(StartReadSpeedsTask, (void*) READ_SPEEDS_TASK_ENABLED, &readSpeedsTask_attributes);
 
   /* creation of imuCanProcTask */
   imuCanProcTaskHandle = osThreadNew(StartImuCanProcTask, (void*) IMU_CAN_PROC_TASK_ENABLED, &imuCanProcTask_attributes);
