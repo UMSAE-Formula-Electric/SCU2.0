@@ -12,13 +12,10 @@
 #include "cmsis_os.h"
 
 // define statements
-#define WHEEL_DIAMETER		1							// In meters
+#define WHEEL_DIAMETER		0.406							// In meters
 #define WHEEL_CIRCUMFERENCE (WHEEL_DIAMETER * 3.14159)	// In meters
 #define NUM_TEETH			37							// number of teeth on rotary encoder
 
-#define DELAY 500										// time in ms
-
-static const double conversionFactor = (1000/DELAY);		// convert pulses to m/s
 
 extern volatile int wheel_FL_pulse_count;
 extern volatile int wheel_FR_pulse_count;
@@ -29,7 +26,7 @@ extern volatile int wheel_RR_pulse_count;
 double calculateWheelSpeed(int pulse_count){
 	volatile double wheel_speed;
 
-	wheel_speed = pulse_count*conversionFactor*WHEEL_CIRCUMFERENCE/NUM_TEETH;	// calculate wheel speed
+	wheel_speed = pulse_count*WHEEL_CIRCUMFERENCE/NUM_TEETH;	// calculate wheel speed
 
 	return wheel_speed;
 }
