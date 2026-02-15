@@ -15,5 +15,4 @@
 #ifndef SHOCK_POT_H_
 #define SHOCK_POT_H_
 
-
 #endif /* SHOCK_POT_H_ */

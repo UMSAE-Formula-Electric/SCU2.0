@@ -42,6 +42,8 @@ extern CAN_HandleTypeDef hcan2;
 #define CAN_SCU_CAN_ID				0x89
 #define CAN_AMS_CAN_ID          	0x70
 #define CAN_VCU_LOG_ID				0x71
+
+#define SHOCK_POT_CAN_ID	0x254
 /* USER CODE END Private defines */
 
 void MX_CAN2_Init(void);

@@ -241,4 +241,25 @@ void StartCanTxTask(void *argument){
         }
     }
 }
+void convertDoubleToCAN(double *value, uint8_t *canData){
+    uint16_t valueScaled[4];
+
+    for(int i = 0; i < 4; i++)
+    {
+        valueScaled[i] = (uint16_t)value[i]*100;//scale by 100 based on dbc
+    }
+
+    canData[0] = valueScaled[0] & 0xFF;
+    canData[1] = valueScaled[0] >> 8;
+
+    canData[2] = valueScaled[1] & 0xFF;
+    canData[3] = valueScaled[1] >> 8;
+
+    canData[4] = valueScaled[2] & 0xFF;
+    canData[5] = valueScaled[2] >> 8;
+
+    canData[6] = valueScaled[3] & 0xFF;
+    canData[7] = valueScaled[3] >> 8;
+
+}
 /* USER CODE END 1 */
