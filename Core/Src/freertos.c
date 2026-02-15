@@ -22,11 +22,11 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
-#include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "can.h"
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,7 +52,7 @@
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for canRxTask */
@@ -73,42 +73,28 @@ const osThreadAttr_t canTxTask_attributes = {
 osThreadId_t readTempTaskHandle;
 const osThreadAttr_t readTempTask_attributes = {
   .name = "readTempTask",
-  .stack_size = 256 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for readShocksTask */
 osThreadId_t readShocksTaskHandle;
 const osThreadAttr_t readShocksTask_attributes = {
   .name = "readShocksTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for readFlowTask */
-osThreadId_t readFlowTaskHandle;
-const osThreadAttr_t readFlowTask_attributes = {
-  .name = "readFlowTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for readSpeedsTask */
-osThreadId_t readSpeedsTaskHandle;
-const osThreadAttr_t readSpeedsTask_attributes = {
-  .name = "readSpeedsTask",
-  .stack_size = 256 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for imuCanProcTask */
 osThreadId_t imuCanProcTaskHandle;
 const osThreadAttr_t imuCanProcTask_attributes = {
   .name = "imuCanProcTask",
-  .stack_size = 128 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for watchDogTask */
 osThreadId_t watchDogTaskHandle;
 const osThreadAttr_t watchDogTask_attributes = {
   .name = "watchDogTask",
-  .stack_size = 256 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for canRxPacketQueue */
@@ -137,8 +123,6 @@ extern void StartCanRxTask(void *argument);
 extern void StartCanTxTask(void *argument);
 extern void StartReadTempTask(void *argument);
 extern void StartReadShocksTask(void *argument);
-extern void StartReadFlowTask(void *argument);
-extern void StartReadSpeedsTask(void *argument);
 extern void StartImuCanProcTask(void *argument);
 extern void StartWatchDogTask(void *argument);
 
@@ -192,12 +176,6 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of readShocksTask */
   readShocksTaskHandle = osThreadNew(StartReadShocksTask, (void*) READ_SHOCKS_TASK_ENABLED, &readShocksTask_attributes);
-
-  /* creation of readFlowTask */
-  readFlowTaskHandle = osThreadNew(StartReadFlowTask, (void*) READ_FLOW_TASK_ENABLED, &readFlowTask_attributes);
-
-  /* creation of readSpeedsTask */
-  readSpeedsTaskHandle = osThreadNew(StartReadSpeedsTask, (void*) READ_SPEEDS_TASK_ENABLED, &readSpeedsTask_attributes);
 
   /* creation of imuCanProcTask */
   imuCanProcTaskHandle = osThreadNew(StartImuCanProcTask, (void*) IMU_CAN_PROC_TASK_ENABLED, &imuCanProcTask_attributes);

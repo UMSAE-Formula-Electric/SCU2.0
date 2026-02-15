@@ -26,11 +26,10 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "logger.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "logger.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -101,12 +100,17 @@ int main(void)
   MX_USART2_Init();
   MX_ADC1_Init();
   MX_RTC_Init();
-  MX_TIM3_Init();
-  MX_TIM4_Init();
+  MX_TIM6_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 
   logMessage("Pin initialization complete.\r\n",true);
-
+  HAL_TIM_Base_Start_IT(&htim6);
+  HAL_TIM_Base_Start(&htim12);
+  HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2);
+  HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_3);
+  HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_4);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -122,6 +126,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
   while (1)
   {
     /* USER CODE END WHILE */
@@ -195,7 +200,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+  if (htim->Instance == TIM6) {
+	  flowmeterTask();
+	  wheelspeedTask();
+  }
   /* USER CODE END Callback 1 */
 }
 
