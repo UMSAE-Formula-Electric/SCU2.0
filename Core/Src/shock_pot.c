@@ -97,14 +97,14 @@ void StartReadShocksTask(void *argument){
 //                 since the index may not align with the correct channel in the future */
                 int written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tDistance: %f\r\n", time, i, potentiometerVoltages[i], distance[i]);
                 buffer_pos += written;
-                uint8_t canData;
-                convertDoubleToCAN(distance[i],canData);
-                uint8_t sendStatus = sendCan(&hcan2,canData,8,SHOCK_POT_CAN_ID,CAN_RTR_DATA,0);
-                if(sendStatus != 0x0)
-                {
-                    logMessage("Shock pot CAN send failed\r\n",true);
-                }
-
+            }
+            /* Send CAN message */
+            uint8_t canData[8];
+            convertDoubleToCAN(distance,canData);
+            uint8_t sendStatus = sendCan(&hcan2,canData,8,SHOCK_POT_CAN_ID,CAN_RTR_DATA,0);
+            if(sendStatus != 0x0)
+            {
+                logMessage("Shock pot CAN send failed\r\n",true);
             }
             /* Logging Starts */
             HAL_USART_Transmit(&husart2, (uint8_t *) concatenatedDistanceMessages, buffer_pos-concatenatedDistanceMessages, 1000);

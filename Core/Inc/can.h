@@ -43,7 +43,12 @@ extern CAN_HandleTypeDef hcan2;
 #define CAN_AMS_CAN_ID          	0x70
 #define CAN_VCU_LOG_ID				0x71
 
-#define SHOCK_POT_CAN_ID	0x254
+#define WHEEL_SPEED_CAN_ID				0x252
+#define SHOCK_POT_CAN_ID				0x254
+#define COOLING_LOOP_THERMISTOR_CAN_ID	0x255
+#define FLOW_METER_CAN_ID				0x256
+
+
 /* USER CODE END Private defines */
 
 void MX_CAN2_Init(void);

@@ -16,6 +16,8 @@
 #include <string.h>
 #include <stdio.h>
 #include "tim.h"
+#include "logger.h"
+#include "can.h"
 
 volatile int i = 0;
 volatile uint32_t flowmeter_pulse_count = 0;
@@ -42,7 +44,16 @@ void flowmeterTask(void){
       sprintf(ms, "Flowmeter pulse count %d: %lu \r\n",i, flowmeter_pulse_count);
       HAL_USART_Transmit(&husart2, (uint8_t*)ms, strlen(ms), HAL_MAX_DELAY);
 
-  	float flowrate = (float)flowmeter_pulse_count/(float)PPL;
+  	double flowrate = (double)flowmeter_pulse_count/(double)PPL;
+
+	/* Send CAN message */
+    uint8_t flowmeterCanData[2];
+    convertFlowrateToCAN(flowrate,flowmeterCanData);
+    uint8_t sendStatus = sendCan(&hcan2,flowmeterCanData,8,FLOW_METER_CAN_ID,CAN_RTR_DATA,0);
+    if(sendStatus != 0x0)
+    {
+        logMessage("Flowmeter CAN send failed\r\n",true);
+    }
 
       char msg[50];
       sprintf(msg, "Flowrate %d: %.4f \r\n",i, flowrate);

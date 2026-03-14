@@ -246,7 +246,8 @@ void convertDoubleToCAN(double *value, uint8_t *canData){
 
     for(int i = 0; i < 4; i++)
     {
-        valueScaled[i] = (uint16_t)value[i]*100;//scale by 100 based on dbc
+        valueScaled[i] = value[i]*100;//scale by 100 based on dbc
+        valueScaled[i]= (uint16_t)valueScaled[i];
     }
 
     canData[0] = valueScaled[0] & 0xFF;
@@ -261,5 +262,14 @@ void convertDoubleToCAN(double *value, uint8_t *canData){
     canData[6] = valueScaled[3] & 0xFF;
     canData[7] = valueScaled[3] >> 8;
 
+}
+void convertFlowrateToCAN(double value, uint8_t *canData){
+	uint16_t valueScaled;
+
+    valueScaled = value*100;//scale by 100 based on dbc
+    valueScaled= (uint16_t)valueScaled;
+
+    canData[0] = valueScaled & 0xFF;
+    canData[1] = valueScaled >> 8;
 }
 /* USER CODE END 1 */

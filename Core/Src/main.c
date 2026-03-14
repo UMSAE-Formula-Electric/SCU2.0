@@ -111,6 +111,7 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2);
   HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_3);
   HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_4);
+  HAL_CAN_Start(&hcan2);
   /* USER CODE END 2 */
 
   /* Init scheduler */
