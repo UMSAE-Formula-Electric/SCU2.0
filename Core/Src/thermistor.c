@@ -15,6 +15,8 @@
 #include "cmsis_os.h"
 #include "stdio.h"
 #include "string.h"
+#include "logger.h"
+#include "can.h"
 
 // STEINHART & HART Equation Coefficients
 const double A = 1.2794639360E-3;
@@ -99,6 +101,14 @@ void StartReadTempTask(void *argument){
                 int written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tTemperature: %f\r\n", time, i, temperatureVoltages[i], temperatures[i]);
                 buffer_pos += written;
 
+            }
+            /* Send CAN message */
+            uint8_t thermistorCanData[8];
+            convertDoubleToCAN(temperatures,thermistorCanData);
+            uint8_t sendStatus = sendCan(&hcan2,thermistorCanData,8,COOLING_LOOP_THERMISTOR_CAN_ID,CAN_RTR_DATA,0);
+            if(sendStatus != 0x0)
+            {
+                logMessage("Thermistor CAN send failed\r\n",true);
             }
 
             /* Logging Starts */
