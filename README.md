@@ -2,7 +2,7 @@
 
 ## Introduction
 This repository contains the code for the Sensor Control Unit (SCU) of the Formula Electric SAE Student Team UMSAE Electric.
-The SCU is responsible for the acquisition of data from the sensors in the vehicle, such as the temperature sensors, the shock potentiometers, the flowmeter, and the Inertial Measurement Unit (IMU).
+The SCU is responsible for the acquisition of data from the sensors in the vehicle, such as the temperature sensors, the shock potentiometers, and the flowmeter.
 The SCU is also responsible for the communication with the other ECUs in the vehicle, such as the Accumulator Control Unit (ACU) and the Vehicle Control Unit (VCU).
 
 ## Cloning the repository

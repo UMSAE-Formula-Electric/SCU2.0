@@ -98,7 +98,7 @@ void StartReadTempTask(void *argument){
                 time = get_time();
 //                /* TODO: correlate the index "i" with the correct physical ADC channel
 //                 since the index may not align with the correct channel in the future */
-                int written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tTemperature: %f\r\n", time, i, temperatureVoltages[i], temperatures[i]);
+                int written = sprintf(buffer_pos, "[%s] Thermistor %d %.5f \tTemperature: %f\r\n", time, i, temperatureVoltages[i], temperatures[i]);
                 buffer_pos += written;
 
             }

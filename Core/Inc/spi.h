@@ -1,13 +1,13 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    iwdg.h
+  * @file    spi.h
   * @brief   This file contains all the function prototypes for
-  *          the iwdg.c file
+  *          the spi.c file
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2024 STMicroelectronics.
+  * Copyright (c) 2026 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -18,8 +18,8 @@
   */
 /* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __IWDG_H__
-#define __IWDG_H__
+#ifndef __SPI_H__
+#define __SPI_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,36 +29,16 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-#include <stdbool.h>
-#include "cmsis_os2.h"
+
 /* USER CODE END Includes */
 
-extern IWDG_HandleTypeDef hiwdg;
+extern SPI_HandleTypeDef hspi3;
 
 /* USER CODE BEGIN Private defines */
-typedef struct {
-    const osThreadId_t* taskHandle;
-    uint8_t isTaskActive;
-} TaskInfo;
 
-typedef enum {
-    DEFAULT_TASK,
-    CAN_TX_TASK,
-    READ_ADC_TASK,
-    READ_TEMP_TASK,
-	READ_BRAKE_TEMP_TASK,
-    READ_SHOCKS_TASK,
-    IMU_CAN_PROC_TASK,
-    WATCH_DOG_TASK,
-    NUM_TASKS
-} TaskBit_t;
-
-bool startFromIWDG();
-extern osEventFlagsId_t iwdgEventGroupHandle;
-void kickWatchdogBit(osThreadId_t taskHandle);
 /* USER CODE END Private defines */
 
-void MX_IWDG_Init(void);
+void MX_SPI3_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
@@ -68,5 +48,5 @@ void MX_IWDG_Init(void);
 }
 #endif
 
-#endif /* __IWDG_H__ */
+#endif /* __SPI_H__ */
 

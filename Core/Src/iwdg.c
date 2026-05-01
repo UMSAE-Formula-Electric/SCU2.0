@@ -86,9 +86,9 @@ TaskInfo* getTaskInfos(size_t* count) {
     static TaskInfo taskInfos[] = {
             {&defaultTaskHandle, DEFAULT_TASK_ENABLED},
             {&canTxTaskHandle, CAN_TX_TASK_ENABLED},
-            {&canRxTaskHandle, CAN_RX_TASK_ENABLED},
             {&readTempTaskHandle, READ_TEMP_TASK_ENABLED},
             {&readShocksTaskHandle, READ_SHOCKS_TASK_ENABLED},
+            {&readBrakeTaskHandle, READ_BRAKE_TEMP_TASK_ENABLED},
             {&imuCanProcTaskHandle, IMU_CAN_PROC_TASK_ENABLED},
             {&watchDogTaskHandle, WATCH_DOG_TASK_ENABLED},
     };

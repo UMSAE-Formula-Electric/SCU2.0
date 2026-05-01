@@ -47,6 +47,7 @@ extern CAN_HandleTypeDef hcan2;
 #define SHOCK_POT_CAN_ID				0x254
 #define COOLING_LOOP_THERMISTOR_CAN_ID	0x255
 #define FLOW_METER_CAN_ID				0x256
+#define BRAKE_TEMP_CAN_ID				0x265
 
 
 /* USER CODE END Private defines */

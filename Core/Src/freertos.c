@@ -55,13 +55,6 @@ const osThreadAttr_t defaultTask_attributes = {
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for canRxTask */
-osThreadId_t canRxTaskHandle;
-const osThreadAttr_t canRxTask_attributes = {
-  .name = "canRxTask",
-  .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
 /* Definitions for canTxTask */
 osThreadId_t canTxTaskHandle;
 const osThreadAttr_t canTxTask_attributes = {
@@ -97,6 +90,13 @@ const osThreadAttr_t watchDogTask_attributes = {
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityHigh,
 };
+/* Definitions for readBrakeTask */
+osThreadId_t readBrakeTaskHandle;
+const osThreadAttr_t readBrakeTask_attributes = {
+  .name = "readBrakeTask",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 /* Definitions for canRxPacketQueue */
 osMessageQueueId_t canRxPacketQueueHandle;
 const osMessageQueueAttr_t canRxPacketQueue_attributes = {
@@ -119,12 +119,12 @@ const osEventFlagsAttr_t iwdgEventGroup_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
-extern void StartCanRxTask(void *argument);
 extern void StartCanTxTask(void *argument);
 extern void StartReadTempTask(void *argument);
 extern void StartReadShocksTask(void *argument);
 extern void StartImuCanProcTask(void *argument);
 extern void StartWatchDogTask(void *argument);
+extern void StartReadBrakeTempTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -165,9 +165,6 @@ void MX_FREERTOS_Init(void) {
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, (void*) DEFAULT_TASK_ENABLED, &defaultTask_attributes);
 
-  /* creation of canRxTask */
-  canRxTaskHandle = osThreadNew(StartCanRxTask, (void*) CAN_RX_TASK_ENABLED, &canRxTask_attributes);
-
   /* creation of canTxTask */
   canTxTaskHandle = osThreadNew(StartCanTxTask, (void*) CAN_TX_TASK_ENABLED, &canTxTask_attributes);
 
@@ -182,6 +179,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of watchDogTask */
   watchDogTaskHandle = osThreadNew(StartWatchDogTask, (void*) WATCH_DOG_TASK_ENABLED, &watchDogTask_attributes);
+
+  /* creation of readBrakeTask */
+  readBrakeTaskHandle = osThreadNew(StartReadBrakeTempTask, (void*) READ_BRAKE_TEMP_TASK_ENABLED, &readBrakeTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

@@ -23,6 +23,7 @@
 #include "can.h"
 #include "dma.h"
 #include "rtc.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -102,15 +103,21 @@ int main(void)
   MX_RTC_Init();
   MX_TIM6_Init();
   MX_TIM1_Init();
+  MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
 
   logMessage("Pin initialization complete.\r\n",true);
-  HAL_TIM_Base_Start_IT(&htim6);
-  HAL_TIM_Base_Start(&htim12);
+
+  HAL_TIM_Base_Start_IT(&htim6); //Flowmeter and Wheel Speed timer
+
+  HAL_TIM_Base_Start(&htim12); //Flowmeter Counter Timer
+
+  //Wheel Speed Counter Timers
   HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1);
   HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2);
   HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_3);
   HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_4);
+
   HAL_CAN_Start(&hcan2);
   /* USER CODE END 2 */
 

@@ -145,80 +145,80 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 }
 
 /* USER CODE BEGIN 1 */
-void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
-{
-    CAN_RxPacketTypeDef rxPacket;
-
-    if (!(HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &(rxPacket.rxPacketHeader), rxPacket.rxPacketData) == HAL_OK &&
-          osMessageQueuePut(canRxPacketQueueHandle, &rxPacket, 0, 0) == osOK)) {
-        uint32_t currQueueSize = osMessageQueueGetCount(canRxPacketQueueHandle);
-        uint32_t maxQueueCapacity = osMessageQueueGetCapacity(canRxPacketQueueHandle);
-
-        if (currQueueSize == maxQueueCapacity) {  /* Queue is full */
-            logMessage("Error adding received message to the CAN Rx queue because the queue is full.\r\n", true);
-        }
-        else {  /* Error receiving message from CAN */
-            logMessage("Error receiving message from the CAN Bus and adding it to the Rx queue.\r\n", true);
-        }
-        Error_Handler();
-    }
-}
-
-void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *hcan)
-{
-    logMessage("CAN Rx FIFO1 is full.\r\n", true);
-}
-
-void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
-{
-    uint32_t canError = HAL_CAN_GetError(hcan);
-    if (canError != HAL_CAN_ERROR_NONE) {
-        logMessage("CAN ERROR CAN ERROR CAN ERROR!!\r\n", true);
-    }
-}
-
-void StartCanRxTask(void *argument)
-{
-    uint8_t isTaskActivated = (int)argument;
-    if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
-    }
-
-    if (!(HAL_CAN_Start(&hcan2) == HAL_OK && HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING | CAN_IT_RX_FIFO1_OVERRUN | CAN_IT_RX_FIFO1_FULL | CAN_IT_ERROR) == HAL_OK))
-    {
-        Error_Handler();
-    }
-
-    CAN_RxPacketTypeDef rxPacket;
-    osStatus_t isMsgTakenFromQueue;
-
-    for (;;)
-    {
-        isMsgTakenFromQueue = osMessageQueueGet(canRxPacketQueueHandle, &rxPacket, 0, 0);
-        if (isMsgTakenFromQueue == osOK)
-        {
-            if (rxPacket.rxPacketHeader.IDE == CAN_ID_EXT)
-            {
-                switch (rxPacket.rxPacketHeader.ExtId)
-                {
-                    case IMU_ACCELERATION_CAN_EXT_ID:
-                        queueAccelerationPacket(rxPacket.rxPacketData);
-                        break;
-                    case IMU_ANGULAR_RATE_CAN_EXT_ID:
-                        queueAngularRatePacket(rxPacket.rxPacketData);
-                        break;
-                }
-            }
-            if (rxPacket.rxPacketHeader.IDE == CAN_ID_STD)
-            {
-                switch (rxPacket.rxPacketHeader.StdId)
-                {
-
-                }
-            }
-        }
-    }
-}
+//void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
+//{
+//    CAN_RxPacketTypeDef rxPacket;
+//
+//    if (!(HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &(rxPacket.rxPacketHeader), rxPacket.rxPacketData) == HAL_OK &&
+//          osMessageQueuePut(canRxPacketQueueHandle, &rxPacket, 0, 0) == osOK)) {
+//        uint32_t currQueueSize = osMessageQueueGetCount(canRxPacketQueueHandle);
+//        uint32_t maxQueueCapacity = osMessageQueueGetCapacity(canRxPacketQueueHandle);
+//
+//        if (currQueueSize == maxQueueCapacity) {  /* Queue is full */
+//            logMessage("Error adding received message to the CAN Rx queue because the queue is full.\r\n", true);
+//        }
+//        else {  /* Error receiving message from CAN */
+//            logMessage("Error receiving message from the CAN Bus and adding it to the Rx queue.\r\n", true);
+//        }
+//        Error_Handler();
+//    }
+//}
+//
+//void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *hcan)
+//{
+//    logMessage("CAN Rx FIFO1 is full.\r\n", true);
+//}
+//
+//void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
+//{
+//    uint32_t canError = HAL_CAN_GetError(hcan);
+//    if (canError != HAL_CAN_ERROR_NONE) {
+//        logMessage("CAN ERROR CAN ERROR CAN ERROR!!\r\n", true);
+//    }
+//}
+//
+//void StartCanRxTask(void *argument)
+//{
+//    uint8_t isTaskActivated = (int)argument;
+//    if (isTaskActivated == 0) {
+//        osThreadTerminate(osThreadGetId());
+//    }
+//
+//    if (!(HAL_CAN_Start(&hcan2) == HAL_OK && HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING | CAN_IT_RX_FIFO1_OVERRUN | CAN_IT_RX_FIFO1_FULL | CAN_IT_ERROR) == HAL_OK))
+//    {
+//        Error_Handler();
+//    }
+//
+//    CAN_RxPacketTypeDef rxPacket;
+//    osStatus_t isMsgTakenFromQueue;
+//
+//    for (;;)
+//    {
+//        isMsgTakenFromQueue = osMessageQueueGet(canRxPacketQueueHandle, &rxPacket, 0, 0);
+//        if (isMsgTakenFromQueue == osOK)
+//        {
+//            if (rxPacket.rxPacketHeader.IDE == CAN_ID_EXT)
+//            {
+//                switch (rxPacket.rxPacketHeader.ExtId)
+//                {
+//                    case IMU_ACCELERATION_CAN_EXT_ID:
+//                        queueAccelerationPacket(rxPacket.rxPacketData);
+//                        break;
+//                    case IMU_ANGULAR_RATE_CAN_EXT_ID:
+//                        queueAngularRatePacket(rxPacket.rxPacketData);
+//                        break;
+//                }
+//            }
+//            if (rxPacket.rxPacketHeader.IDE == CAN_ID_STD)
+//            {
+//                switch (rxPacket.rxPacketHeader.StdId)
+//                {
+//
+//                }
+//            }
+//        }
+//    }
+//}
 
 void StartCanTxTask(void *argument){
     uint8_t isTaskActivated = (int)argument;

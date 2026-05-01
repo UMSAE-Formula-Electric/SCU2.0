@@ -95,7 +95,7 @@ void StartReadShocksTask(void *argument){
                 time = get_time();
 //                /* TODO: correlate the index "i" with the correct physical ADC channel
 //                 since the index may not align with the correct channel in the future */
-                int written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tDistance: %f\r\n", time, i, potentiometerVoltages[i], distance[i]);
+                int written = sprintf(buffer_pos, "[%s] Shock Pot %d %.5f \tDistance: %f\r\n", time, i, potentiometerVoltages[i], distance[i]);
                 buffer_pos += written;
             }
             /* Send CAN message */
