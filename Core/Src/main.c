@@ -108,9 +108,9 @@ int main(void)
 
   logMessage("Pin initialization complete.\r\n",true);
 
-  HAL_TIM_Base_Start_IT(&htim6); //Flowmeter and Wheel Speed timer
+  HAL_TIM_Base_Start_IT(&htim6); //Interrupt timer for flowmeter and wheel speed
 
-  HAL_TIM_Base_Start(&htim12); //Flowmeter Counter Timer
+  HAL_TIM_Base_Start(&htim12); //Flowmeter counter timer
 
   //Wheel Speed Counter Timers
   HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1);
@@ -210,7 +210,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 1 */
   if (htim->Instance == TIM6) {
 	  flowmeterTask();
-	  wheelspeedTask();
+	  wheelSpeedTask();
   }
   /* USER CODE END Callback 1 */
 }
