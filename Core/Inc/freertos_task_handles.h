@@ -10,7 +10,7 @@
 extern osThreadId_t defaultTaskHandle;
 extern osThreadId_t canTxTaskHandle;
 extern osThreadId_t readTempTaskHandle;
-extern osThreadId_t readBrakeTaskHandle;
+extern osThreadId_t brakeTempTaskHandle;
 extern osThreadId_t readShocksTaskHandle;
 extern osThreadId_t imuCanProcTaskHandle;
 extern osThreadId_t watchDogTaskHandle;

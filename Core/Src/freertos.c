@@ -90,10 +90,10 @@ const osThreadAttr_t watchDogTask_attributes = {
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityHigh,
 };
-/* Definitions for readBrakeTask */
-osThreadId_t readBrakeTaskHandle;
-const osThreadAttr_t readBrakeTask_attributes = {
-  .name = "readBrakeTask",
+/* Definitions for brakeTempTask */
+osThreadId_t brakeTempTaskHandle;
+const osThreadAttr_t brakeTempTask_attributes = {
+  .name = "brakeTempTask",
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
@@ -180,8 +180,8 @@ void MX_FREERTOS_Init(void) {
   /* creation of watchDogTask */
   watchDogTaskHandle = osThreadNew(StartWatchDogTask, (void*) WATCH_DOG_TASK_ENABLED, &watchDogTask_attributes);
 
-  /* creation of readBrakeTask */
-  readBrakeTaskHandle = osThreadNew(StartReadBrakeTempTask, (void*) READ_BRAKE_TEMP_TASK_ENABLED, &readBrakeTask_attributes);
+  /* creation of brakeTempTask */
+  brakeTempTaskHandle = osThreadNew(StartReadBrakeTempTask, (void*) READ_BRAKE_TEMP_TASK_ENABLED, &brakeTempTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
