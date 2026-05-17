@@ -7,13 +7,11 @@
 //
 //*********************************************************************
 #include "brake_temp.h"
-#include "math.h"
+#include "spi.h"
 #include "stdio.h"
-#include "adc.h"
 #include "usart.h"
 #include "rtc.h"
 #include "cmsis_os.h"
-#include "stdio.h"
 #include "string.h"
 #include "logger.h"
 #include "can.h"
@@ -21,9 +19,7 @@
 //Brake Temp Variables and Macros
 #define NUM_BRAKE_TEMP_SENSORS 4
 double brakeTemps[NUM_BRAKE_TEMP_SENSORS];
-#define BRAKETEMP_DELAY_MS 5
-
-extern SPI_HandleTypeDef hspi3;
+#define BRAKETEMP_DELAY_MS 20
 
 //*********************************************************************
 // readThermocouples
@@ -74,7 +70,7 @@ void StartReadBrakeTempTask(void *argument){
     }
 
     static char concatenatedTempMessages[256]; // TODO: make sure we don't concatenate past msg size, look at strncat()
-    char* time;
+    char* timestamp;
     static char* buffer_pos = concatenatedTempMessages;
 
 	for(;;){
@@ -84,9 +80,9 @@ void StartReadBrakeTempTask(void *argument){
 		brakeTemps[3] = readThermocouples(GPIOD,GPIO_PIN_11);//Brake Temp 4 Chip Select PD11
 
 		for(int i = 0; i < NUM_BRAKE_TEMP_SENSORS;i++){
-		   time = get_time();
+		   timestamp = get_time();
 
-			int written = sprintf(buffer_pos, "[%s] Thermocouple #%d Temp %.5f°C\r\n", time, i, brakeTemps[i]);
+			int written = sprintf(buffer_pos, "[%s] Thermocouple #%d Temp %.5f°C\r\n", timestamp, i, brakeTemps[i]);
 			buffer_pos += written;
 		}
 

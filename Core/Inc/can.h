@@ -53,6 +53,7 @@ extern CAN_HandleTypeDef hcan2;
 /* USER CODE END Private defines */
 
 void MX_CAN2_Init(void);
+void convertDoubleToCAN(double *value, uint8_t *canData);
 
 /* USER CODE BEGIN Prototypes */
 

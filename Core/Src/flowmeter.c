@@ -23,8 +23,8 @@
 volatile int i = 0;
 volatile uint32_t flowmeter_pulse_count = 0;
 const int PPL = 2200;													// pulse per liter
-const int DELAY = 1000;													// time in ms
-static const double conversionFactor = (1000/DELAY)*(1.0/1000.0);		// convert L/s to m^3/s
+const int PERIOD = 1000;													// time in ms
+static const double conversionFactor = (1000/PERIOD)*(1.0/1000.0);		// convert L/s to m^3/s
 
 //*********************************************************************
 // calculateFlowrate
