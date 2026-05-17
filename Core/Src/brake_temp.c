@@ -8,6 +8,7 @@
 //*********************************************************************
 #include "brake_temp.h"
 #include "spi.h"
+#include "math.h"
 #include "stdio.h"
 #include "usart.h"
 #include "rtc.h"
@@ -18,6 +19,7 @@
 
 //Brake Temp Variables and Macros
 #define NUM_BRAKE_TEMP_SENSORS 4
+bool validTemps;
 double brakeTemps[NUM_BRAKE_TEMP_SENSORS];
 #define BRAKETEMP_DELAY_MS 20
 
@@ -50,7 +52,7 @@ double readThermocouples(GPIO_TypeDef* port, uint16_t pin){
 
     // Check fault bits for an error
     if (raw & 0x7) {
-        return -1;
+        return NAN;
     }
 
     int16_t temp = (raw >> 18) & 0x3FFF;//MAX31855 has 14 bit temperature field so shift bits
@@ -74,6 +76,7 @@ void StartReadBrakeTempTask(void *argument){
     static char* buffer_pos = concatenatedTempMessages;
 
 	for(;;){
+		validTemps = true;
 		brakeTemps[0] = readThermocouples(GPIOD,GPIO_PIN_8);//Brake Temp 1 Chip Select PD8
 		brakeTemps[1] = readThermocouples(GPIOD,GPIO_PIN_9);//Brake Temp 2 Chip Select PD9
 		brakeTemps[2] = readThermocouples(GPIOD,GPIO_PIN_10);//Brake Temp 3 Chip Select PD10
@@ -81,18 +84,25 @@ void StartReadBrakeTempTask(void *argument){
 
 		for(int i = 0; i < NUM_BRAKE_TEMP_SENSORS;i++){
 		   timestamp = get_time();
+		   if(isnan(brakeTemps[i])){
+			   validTemps = false;
+		   }
+		   else{
+				int written = sprintf(buffer_pos, "[%s] Thermocouple #%d Temp %.5f°C\r\n", timestamp, i, brakeTemps[i]);
+				buffer_pos += written;
+		   }
 
-			int written = sprintf(buffer_pos, "[%s] Thermocouple #%d Temp %.5f°C\r\n", timestamp, i, brakeTemps[i]);
-			buffer_pos += written;
 		}
 
 		//====================== CAN Messaging ======================
-        uint8_t brakeTempCanData[8];
-        convertDoubleToCAN(brakeTemps,brakeTempCanData);
-        uint8_t sendStatus = sendCan(&hcan2,brakeTempCanData,8,BRAKE_TEMP_CAN_ID,CAN_RTR_DATA,0);
-        if(sendStatus != 0x0)
-        {
-            logMessage("Brake Temp CAN send failed\r\n",true);
+        if(validTemps){
+    		uint8_t brakeTempCanData[8];
+            convertDoubleToCAN(brakeTemps,brakeTempCanData);
+            uint8_t sendStatus = sendCan(&hcan2,brakeTempCanData,8,BRAKE_TEMP_CAN_ID,CAN_RTR_DATA,0);
+            if(sendStatus != 0x0)
+            {
+                logMessage("Brake Temp CAN send failed\r\n",true);
+            }
         }
         //===========================================================
 
