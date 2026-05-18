@@ -47,6 +47,7 @@ extern CAN_HandleTypeDef hcan2;
 #define SHOCK_POT_CAN_ID				0x254
 #define COOLING_LOOP_THERMISTOR_CAN_ID	0x255
 #define FLOW_METER_CAN_ID				0x256
+#define BRAKE_TEMP_CAN_ID				0x265
 
 
 /* USER CODE END Private defines */
@@ -54,7 +55,7 @@ extern CAN_HandleTypeDef hcan2;
 void MX_CAN2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void convertDoubleToCAN(double *value, uint8_t *canData);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

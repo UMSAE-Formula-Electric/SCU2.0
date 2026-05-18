@@ -3,11 +3,12 @@
 //	@file 		shock_pot.c
 //	@author 	Evan Mack
 //	@created	Nov 25, 2025
-//	@brief		Calculates shock pot distance
+//	@brief		Calculates shock potentiometer distance
 //
 //	@datasheet	https://drive.google.com/file/d/1g9wjH6BT5--y21_IYlu2G4MbX3KbiAo5/view?usp=share_link
 //	@sensor		3V3 Blue, Ground Brown, Yellow Voltage Read
 //  @range	Electrical Stroke: 50mm, Mechanical Stroke: 55mm
+
 //*********************************************************************
 
 #include "shock_pot.h"
@@ -23,9 +24,9 @@
 #include "logger.h"
 #include "can.h"
 
-// variables defined in shock_pot.c
+// Shock Pot Variables and Macros
 #define SHOCK_POT_DELAY_MS 5
-#define NUM_SHOCK_POTS 4 // a define instead of a const int to prevent variably modified at file scope error
+#define NUM_SHOCK_POTS 4
 
 const float MAX_DISTANCE = 50;	// max travel of shock potentiometer in mm
 volatile double potentiometerVoltages[NUM_SHOCK_POTS];//Voltages of the shock potentiometers
@@ -42,8 +43,6 @@ volatile double distance[NUM_SHOCK_POTS];	// holds distances read from each ADC 
 // RETURN:	distance in mm of type double
 //*********************************************************************
 double getDistanceFromVoltage(double voltage){
-	//TODO:Handle Dead Zones
-
 	double distance = MAX_DISTANCE * voltage / V_DD;
 	return distance;
 }
@@ -80,7 +79,7 @@ void StartReadShocksTask(void *argument){
 
     static char concatenatedDistanceMessages[256]; // TODO: make sure we don't concatenate past msg size, look at strncat()
     char* time;
-    static char* buffer_pos = concatenatedDistanceMessages;;
+    static char* buffer_pos = concatenatedDistanceMessages;
 
     for (;;){
         if (newData_shock_pot == 1){
@@ -95,10 +94,10 @@ void StartReadShocksTask(void *argument){
                 time = get_time();
 //                /* TODO: correlate the index "i" with the correct physical ADC channel
 //                 since the index may not align with the correct channel in the future */
-                int written = sprintf(buffer_pos, "[%s] ADC %d %.5f \tDistance: %f\r\n", time, i, potentiometerVoltages[i], distance[i]);
+                int written = sprintf(buffer_pos, "[%s] Shock Pot %d %.5f \tDistance: %f\r\n", time, i, potentiometerVoltages[i], distance[i]);
                 buffer_pos += written;
             }
-            /* Send CAN message */
+            //====================== CAN Messaging ======================
             uint8_t canData[8];
             convertDoubleToCAN(distance,canData);
             uint8_t sendStatus = sendCan(&hcan2,canData,8,SHOCK_POT_CAN_ID,CAN_RTR_DATA,0);
@@ -106,12 +105,14 @@ void StartReadShocksTask(void *argument){
             {
                 logMessage("Shock pot CAN send failed\r\n",true);
             }
-            /* Logging Starts */
-            HAL_USART_Transmit(&husart2, (uint8_t *) concatenatedDistanceMessages, buffer_pos-concatenatedDistanceMessages, 1000);
-            /* Logging Ends */
-            buffer_pos = concatenatedDistanceMessages;
+            //===========================================================
 
-            newData_shock_pot = 0;					// reset ADC conversion flag
+            //---------------------- Debug Logging ----------------------
+            HAL_USART_Transmit(&husart2, (uint8_t *) concatenatedDistanceMessages, buffer_pos-concatenatedDistanceMessages, 1000);
+            buffer_pos = concatenatedDistanceMessages;
+            //-----------------------------------------------------------
+
+            newData_shock_pot = 0;	// reset ADC conversion flag
             osDelay(pdMS_TO_TICKS(SHOCK_POT_DELAY_MS));
         }
 

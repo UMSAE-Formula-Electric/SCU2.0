@@ -43,13 +43,11 @@ typedef struct {
 
 typedef enum {
     DEFAULT_TASK,
-    CAN_RX_TASK,
     CAN_TX_TASK,
     READ_ADC_TASK,
     READ_TEMP_TASK,
+	READ_BRAKE_TEMP_TASK,
     READ_SHOCKS_TASK,
-    READ_FLOW_TASK,
-    READ_SPEED_TASK,
     IMU_CAN_PROC_TASK,
     WATCH_DOG_TASK,
     NUM_TASKS

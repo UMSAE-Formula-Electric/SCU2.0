@@ -1,13 +1,13 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    adc.h
+  * @file    spi.h
   * @brief   This file contains all the function prototypes for
-  *          the adc.c file
+  *          the spi.c file
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2024 STMicroelectronics.
+  * Copyright (c) 2026 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -18,8 +18,8 @@
   */
 /* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __ADC_H__
-#define __ADC_H__
+#ifndef __SPI_H__
+#define __SPI_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,40 +32,21 @@ extern "C" {
 
 /* USER CODE END Includes */
 
-extern ADC_HandleTypeDef hadc1;
+extern SPI_HandleTypeDef hspi3;
 
 /* USER CODE BEGIN Private defines */
-extern volatile int newData_thermistor; // flag to determine if the ADC has finished a read
-extern volatile int newData_shock_pot;	// flag to determine if the ADC has finished a read
-extern const float V_DD;
-extern const double ADC_TO_Voltage;
 
-#define INVALID_ADC_READING 65535U
-
-/* TODO: talk with sparkies and change MC back/front labeling to IN/OUT
- * naming scheme following the microcontroller pinout*/
-enum ADC_CHANNEL{
-  FL_SHOCK_POTENTIOMETER = 0,
-  FR_SHOCK_POTENTIOMETER,
-  BL_SHOCK_POTENTIOMETER,
-  BR_SHOCK_POTENTIOMETER,
-  MOTOR_FRONT_THERMISTOR,
-  MOTOR_BACK_THERMISTOR,
-  COOLING_PUMP_THERMISTOR,
-  COOLING_RADIATOR_THERMISTOR,
-  NUM_ADC_CHANNELS
-};
 /* USER CODE END Private defines */
 
-void MX_ADC1_Init(void);
+void MX_SPI3_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-  uint32_t ADC_get_val(uint8_t item);
+
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __ADC_H__ */
+#endif /* __SPI_H__ */
 
