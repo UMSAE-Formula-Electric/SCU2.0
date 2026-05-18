@@ -16,7 +16,8 @@
 //Wheel Speed Variables and Macros
 #define WHEEL_DIAMETER		0.406						// In meters
 #define WHEEL_CIRCUMFERENCE (WHEEL_DIAMETER * 3.14159)	// In meters
-#define NUM_TEETH			23							// number of teeth on gear
+#define NUM_TEETH_FRONT			23							// number of teeth on front gear
+#define NUM_TEETH_BACK			37							// number of teeth on back gear
 #define NUM_WHEELSPEEDS		4
 
 extern volatile int wheel_FL_pulse_count;
@@ -31,13 +32,14 @@ extern volatile int wheel_RR_pulse_count;
 //
 // INPUT PARAMTERS:
 //			pulse_count - the pulse count for each wheel speed sensor
+//			numTeeth - the number of teeth on the gear
 //
 // RETURN:	wheel_speed - speed of the wheel in m/s of type double
 //*********************************************************************
-double calculateWheelSpeed(int pulse_count){
+double calculateWheelSpeed(int pulse_count, int numTeeth){
 	volatile double wheel_speed;
 
-	wheel_speed = pulse_count*WHEEL_CIRCUMFERENCE/NUM_TEETH;	// calculate wheel speed in m/s
+	wheel_speed = pulse_count*WHEEL_CIRCUMFERENCE/numTeeth;	// calculate wheel speed in m/s
 
 	return wheel_speed;
 }
@@ -50,10 +52,10 @@ double calculateWheelSpeed(int pulse_count){
 void wheelSpeedTask(void) {
 	double wheelSpeeds[NUM_WHEELSPEEDS];
 
-	wheelSpeeds[0] = calculateWheelSpeed(wheel_FL_pulse_count);//FL PA8
-	wheelSpeeds[1] = calculateWheelSpeed(wheel_FR_pulse_count);//FR PA9
-	wheelSpeeds[2] = calculateWheelSpeed(wheel_RL_pulse_count);//RL PA10
-	wheelSpeeds[3] = calculateWheelSpeed(wheel_RR_pulse_count);//RR PA11
+	wheelSpeeds[0] = calculateWheelSpeed(wheel_FL_pulse_count,NUM_TEETH_FRONT);//FL PA8
+	wheelSpeeds[1] = calculateWheelSpeed(wheel_FR_pulse_count,NUM_TEETH_FRONT);//FR PA9
+	wheelSpeeds[2] = calculateWheelSpeed(wheel_RL_pulse_count,NUM_TEETH_BACK);//RL PA10
+	wheelSpeeds[3] = calculateWheelSpeed(wheel_RR_pulse_count,NUM_TEETH_BACK);//RR PA11
 
 	//====================== CAN Messaging ======================
     uint8_t wheelSpeedCanData[8];

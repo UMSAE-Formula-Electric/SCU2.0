@@ -113,6 +113,5 @@ void StartReadBrakeTempTask(void *argument){
 
 		osDelay(pdMS_TO_TICKS(BRAKETEMP_DELAY_MS));
 	}
-	osThreadYield();
 }
 
