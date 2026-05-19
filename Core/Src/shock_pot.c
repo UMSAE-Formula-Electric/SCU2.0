@@ -94,8 +94,11 @@ void StartReadShocksTask(void *argument){
                 time = get_time();
 //                /* TODO: correlate the index "i" with the correct physical ADC channel
 //                 since the index may not align with the correct channel in the future */
-                int written = sprintf(buffer_pos, "[%s] Shock Pot %d %.5f \tDistance: %f\r\n", time, i, potentiometerVoltages[i], distance[i]);
-                buffer_pos += written;
+ 			    int remaining = sizeof(concatenatedDistanceMessages) - (buffer_pos - concatenatedDistanceMessages);
+ 			    int written = snprintf(buffer_pos, remaining, "[%s] Shock Pot %d %.3f \tDistance: %.3f\r\n", time, i, potentiometerVoltages[i], distance[i]);
+ 			    if (written > 0 && written < remaining) {
+ 			       buffer_pos += written;
+ 			   }
             }
             //====================== CAN Messaging ======================
             uint8_t canData[8];

@@ -88,8 +88,11 @@ void StartReadBrakeTempTask(void *argument){
 			   validTemps = false;
 		   }
 		   else{
-				int written = sprintf(buffer_pos, "[%s] Thermocouple #%d Temp %.5f°C\r\n", timestamp, i, brakeTemps[i]);
-				buffer_pos += written;
+			   int remaining = sizeof(concatenatedTempMessages) - (buffer_pos - concatenatedTempMessages);
+			   int written = snprintf(buffer_pos, remaining, "[%s] Thermocouple #%d Temp %.2f°C\r\n", timestamp, i, brakeTemps[i]);
+			   if (written > 0 && written < remaining) {
+			       buffer_pos += written;
+			   }
 		   }
 
 		}
