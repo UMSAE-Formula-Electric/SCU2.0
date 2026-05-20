@@ -44,7 +44,7 @@ double readThermocouples(GPIO_TypeDef* port, uint16_t pin){
     HAL_StatusTypeDef spiReturn = HAL_SPI_TransmitReceive(&hspi3, dummyTransmit,brakeTempReceiveBuffer, 4, SPI_TIMEOUT_MS);
     HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET);
 
-    if (spiStatus != HAL_OK) {
+    if (spiReturn != HAL_OK) {
             return NAN;
 	}
 
@@ -87,6 +87,9 @@ void StartReadBrakeTempTask(void *argument){
 		brakeTemps[2] = readThermocouples(GPIOD,GPIO_PIN_10);//Brake Temp 3 Chip Select PD10
 		brakeTemps[3] = readThermocouples(GPIOD,GPIO_PIN_11);//Brake Temp 4 Chip Select PD11
 
+		buffer_pos = concatenatedTempMessages;
+		*buffer_pos = '\0';
+
 		for(int i = 0; i < NUM_BRAKE_TEMP_SENSORS;i++){
 		   timestamp = get_time();
 		   if(isnan(brakeTemps[i])){
@@ -95,7 +98,7 @@ void StartReadBrakeTempTask(void *argument){
 		   else{
 			   int remaining = sizeof(concatenatedTempMessages) - (buffer_pos - concatenatedTempMessages);
 			   int written = snprintf(buffer_pos, remaining, "[%s] Thermocouple #%d Temp %.2f°C\r\n", timestamp, i, brakeTemps[i]);
-			   if (written > 0 && written < remaining) {
+			   if (written >= 0 && written < remaining) {
 			       buffer_pos += written;
 			   }
 		   }
@@ -116,7 +119,7 @@ void StartReadBrakeTempTask(void *argument){
 
         //---------------------- Debug Logging ----------------------
 		HAL_USART_Transmit(&husart2, (uint8_t *) concatenatedTempMessages, buffer_pos-concatenatedTempMessages, 1000);
-		buffer_pos = concatenatedTempMessages;
+//		buffer_pos = concatenatedTempMessages;
 		//-----------------------------------------------------------
 
 		osDelay(pdMS_TO_TICKS(BRAKETEMP_DELAY_MS));

@@ -75,11 +75,11 @@ void flowmeterTask(void){
 
     //---------------------- Debug Logging ----------------------
   	char ms[50];
-  	sprintf(ms, "Flowmeter pulse count %d: %lu \r\n",i, flowmeter_pulse_count);
+  	snprintf(ms, "Flowmeter pulse count %d: %lu \r\n",i, flowmeter_pulse_count);
   	HAL_USART_Transmit(&husart2, (uint8_t*)ms, strlen(ms), UART_TIMEOUT_MS);
 
   	char msg[50];
-  	sprintf(msg, "Flowrate %d: %.4f \r\n",i, flowrate);
+  	snprintf(msg, "Flowrate %d: %.4f \r\n",i, flowrate);
   	HAL_USART_Transmit(&husart2, (uint8_t*)msg, strlen(msg), UART_TIMEOUT_MS);
   	i = i + 1;
   	//-----------------------------------------------------------

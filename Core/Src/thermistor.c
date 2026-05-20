@@ -117,7 +117,7 @@ void StartReadTempTask(void *argument){
 //                 since the index may not align with the correct channel in the future */
                 int remaining = sizeof(concatenatedTempMessages) - (buffer_pos - concatenatedTempMessages);
  			    int written = snprintf(buffer_pos, remaining, "[%s] Thermistor %d %.5f \tTemperature: %f\r\n", time, i, temperatureVoltages[i], temperatures[i]);
- 			    if (written > 0 && written < remaining) {
+ 			    if (written >= 0 && written < remaining) {
  			       buffer_pos += written;
  			    }
 

@@ -96,7 +96,7 @@ void StartReadShocksTask(void *argument){
 //                 since the index may not align with the correct channel in the future */
  			    int remaining = sizeof(concatenatedDistanceMessages) - (buffer_pos - concatenatedDistanceMessages);
  			    int written = snprintf(buffer_pos, remaining, "[%s] Shock Pot %d %.3f \tDistance: %.3f\r\n", time, i, potentiometerVoltages[i], distance[i]);
- 			    if (written > 0 && written < remaining) {
+ 			    if (written >= 0 && written < remaining) {
  			       buffer_pos += written;
  			   }
             }
