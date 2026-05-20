@@ -22,6 +22,7 @@
 bool validTemps;
 double brakeTemps[NUM_BRAKE_TEMP_SENSORS];
 #define BRAKETEMP_DELAY_MS 20
+#define SPI_TIMEOUT_MS 20
 
 //*********************************************************************
 // readThermocouples
@@ -40,8 +41,12 @@ double readThermocouples(GPIO_TypeDef* port, uint16_t pin){
     uint8_t dummyTransmit[4] = {0xFF, 0xFF, 0xFF, 0xFF};
 
     HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);//Pull CS low to read
-    HAL_SPI_TransmitReceive(&hspi3, dummyTransmit,brakeTempReceiveBuffer, 4, HAL_MAX_DELAY);
+    HAL_StatusTypeDef spiReturn = HAL_SPI_TransmitReceive(&hspi3, dummyTransmit,brakeTempReceiveBuffer, 4, SPI_TIMEOUT_MS);
     HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET);
+
+    if (spiStatus != HAL_OK) {
+            return NAN;
+	}
 
     uint32_t brakeTemp32Bit = (brakeTempReceiveBuffer[0] << 24) |
     						  (brakeTempReceiveBuffer[1] << 16) |

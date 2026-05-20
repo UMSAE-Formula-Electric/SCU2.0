@@ -24,6 +24,9 @@ volatile int i = 0;
 volatile uint32_t flowmeter_pulse_count = 0;
 const int PPL = 2200;													// pulse per liter
 const int PERIOD = 1000;													// time in ms
+
+#define UART_TIMEOUT_MS 50
+
 static const double conversionFactor = (1000/PERIOD)*(1.0/1000.0);		// convert L/s to m^3/s
 
 //*********************************************************************
@@ -53,9 +56,14 @@ void flowmeterTask(void){
   	flowmeter_pulse_count = __HAL_TIM_GET_COUNTER(&htim12); //PB14
       __HAL_TIM_SetCounter(&htim12, 0);
 
+
+      // TODO: This inline math results in L/s and ignores the conversionFactor to m^3/s.
+	  // Not sure if this is for testing but need to replace this line with: double flowrate = calculateFlowrate();
   	double flowrate = (double)flowmeter_pulse_count/(double)PPL;
 
   	//====================== CAN Messaging ======================
+  	// TODO: Array is 2 bytes, but sendCan transmits 8.
+	// Either change array to `uint8_t flowmeterCanData[8] = {0};` or change sendCan length to 2
     uint8_t flowmeterCanData[2];
     convertFlowrateToCAN(flowrate,flowmeterCanData);
     uint8_t sendStatus = sendCan(&hcan2,flowmeterCanData,8,FLOW_METER_CAN_ID,CAN_RTR_DATA,0);
@@ -68,11 +76,11 @@ void flowmeterTask(void){
     //---------------------- Debug Logging ----------------------
   	char ms[50];
   	sprintf(ms, "Flowmeter pulse count %d: %lu \r\n",i, flowmeter_pulse_count);
-  	HAL_USART_Transmit(&husart2, (uint8_t*)ms, strlen(ms), HAL_MAX_DELAY);
+  	HAL_USART_Transmit(&husart2, (uint8_t*)ms, strlen(ms), UART_TIMEOUT_MS);
 
   	char msg[50];
   	sprintf(msg, "Flowrate %d: %.4f \r\n",i, flowrate);
-  	HAL_USART_Transmit(&husart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+  	HAL_USART_Transmit(&husart2, (uint8_t*)msg, strlen(msg), UART_TIMEOUT_MS);
   	i = i + 1;
   	//-----------------------------------------------------------
 }
