@@ -19,6 +19,7 @@
 #define NUM_TEETH_FRONT			23							// number of teeth on front gear
 #define NUM_TEETH_BACK			37							// number of teeth on back gear
 #define NUM_WHEELSPEEDS		4
+#define UART_TIMEOUT_MS 50
 
 extern volatile int wheel_FL_pulse_count;
 extern volatile int wheel_FR_pulse_count;
@@ -74,7 +75,7 @@ void wheelSpeedTask(void) {
 			 //wheelSpeeds[0], wheelSpeeds[1], wheelSpeeds[2], wheelSpeeds[3]);
 			 wheel_FL_pulse_count, wheel_FR_pulse_count, wheel_RL_pulse_count, wheel_RR_pulse_count);
 
-    HAL_USART_Transmit(&husart2, (uint8_t*)msgspeed, strlen(msgspeed), HAL_MAX_DELAY);
+    HAL_USART_Transmit(&husart2, (uint8_t*)msgspeed, strlen(msgspeed), UART_TIMEOUT_MS);
     //-----------------------------------------------------------
 
     //Reset counts

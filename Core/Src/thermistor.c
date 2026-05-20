@@ -104,7 +104,9 @@ void StartReadTempTask(void *argument){
 
     for (;;){
         if (newData_thermistor == 1) {
-            int written = 0;
+        	buffer_pos = concatenatedTempMessages;
+        	*buffer_pos = '\0';
+
             // Array of voltages passed by reference
             readTemperatureSensorVoltageFromADC(temperatureVoltages);
 
@@ -113,8 +115,11 @@ void StartReadTempTask(void *argument){
                 time = get_time();
 //                /* TODO: correlate the index "i" with the correct physical ADC channel
 //                 since the index may not align with the correct channel in the future */
-                int written = sprintf(buffer_pos, "[%s] Thermistor %d %.5f \tTemperature: %f\r\n", time, i, temperatureVoltages[i], temperatures[i]);
-                buffer_pos += written;
+                int remaining = sizeof(concatenatedTempMessages) - (buffer_pos - concatenatedTempMessages);
+ 			    int written = snprintf(buffer_pos, remaining, "[%s] Thermistor %d %.5f \tTemperature: %f\r\n", time, i, temperatureVoltages[i], temperatures[i]);
+ 			    if (written >= 0 && written < remaining) {
+ 			       buffer_pos += written;
+ 			    }
 
             }
             //====================== CAN Messaging ======================
