@@ -66,7 +66,7 @@ void flowmeterTask(void){
 	// Either change array to `uint8_t flowmeterCanData[8] = {0};` or change sendCan length to 2
     uint8_t flowmeterCanData[2];
     convertFlowrateToCAN(flowrate,flowmeterCanData);
-    uint8_t sendStatus = sendCan(&hcan2,flowmeterCanData,8,FLOW_METER_CAN_ID,CAN_RTR_DATA,0);
+    uint8_t sendStatus = sendCan(&hcan2,flowmeterCanData,2,FLOW_METER_CAN_ID,CAN_RTR_DATA,0);
     if(sendStatus != 0x0)
     {
         logMessage("Flowmeter CAN send failed\r\n",true);
