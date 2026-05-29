@@ -84,6 +84,8 @@ void Error_Handler(void);
 #define FL_WHEEL_S_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
+#define FLOWMETER_TASK_ENABLED 1
+#define WHEEL_SPEED_TASK_ENABLED 1
 
 /* USER CODE END Private defines */
 

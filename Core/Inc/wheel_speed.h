@@ -15,5 +15,7 @@
 #ifndef _WHEELSPEED
 #define _WHEELSPEED
 
+void StartWheelSpeedTask(void *argument);
+
 
 #endif // ifndef _WHEELSPEED

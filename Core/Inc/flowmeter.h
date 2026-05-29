@@ -13,5 +13,6 @@
 #define _FLOWMETER
 
 void flowmeterTask(void);
+void StartFlowmeterTask(void *argument);
 
 #endif // ifndef _FLOWMETER
