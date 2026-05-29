@@ -18,6 +18,8 @@
 #include "tim.h"
 #include "logger.h"
 #include "can.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 //Flowmeter Variables and Macros
 volatile int i = 0;
@@ -83,4 +85,16 @@ void flowmeterTask(void){
   	HAL_USART_Transmit(&husart2, (uint8_t*)msg, strlen(msg), UART_TIMEOUT_MS);
   	i = i + 1;
   	//-----------------------------------------------------------
+}
+
+void StartFlowmeterTask(void *argument) {
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
+    for(;;) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        flowmeterTask();
+    }
 }

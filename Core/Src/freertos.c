@@ -97,6 +97,20 @@ const osThreadAttr_t brakeTempTask_attributes = {
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for readFlowmeter */
+osThreadId_t readFlowmeterHandle;
+const osThreadAttr_t readFlowmeter_attributes = {
+  .name = "readFlowmeter",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for readWheelSpeed */
+osThreadId_t readWheelSpeedHandle;
+const osThreadAttr_t readWheelSpeed_attributes = {
+  .name = "readWheelSpeed",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 /* Definitions for canRxPacketQueue */
 osMessageQueueId_t canRxPacketQueueHandle;
 const osMessageQueueAttr_t canRxPacketQueue_attributes = {
@@ -125,6 +139,8 @@ extern void StartReadShocksTask(void *argument);
 extern void StartImuCanProcTask(void *argument);
 extern void StartWatchDogTask(void *argument);
 extern void StartReadBrakeTempTask(void *argument);
+extern void StartFlowmeterTask(void *argument);
+extern void StartWheelSpeedTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -182,6 +198,12 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of brakeTempTask */
   brakeTempTaskHandle = osThreadNew(StartReadBrakeTempTask, (void*) READ_BRAKE_TEMP_TASK_ENABLED, &brakeTempTask_attributes);
+
+  /* creation of readFlowmeter */
+  readFlowmeterHandle = osThreadNew(StartFlowmeterTask, (void*) FLOWMETER_TASK_ENABLED, &readFlowmeter_attributes);
+
+  /* creation of readWheelSpeed */
+  readWheelSpeedHandle = osThreadNew(StartWheelSpeedTask, (void*) WHEEL_SPEED_TASK_ENABLED, &readWheelSpeed_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

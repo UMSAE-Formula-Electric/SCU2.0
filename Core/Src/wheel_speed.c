@@ -84,3 +84,15 @@ void wheelSpeedTask(void) {
 	wheel_RL_pulse_count = 0;
 	wheel_RR_pulse_count = 0;
 }
+
+void StartWheelSpeedTask(void *argument) {
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
+    for(;;) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        wheelSpeedTask();
+    }
+}

@@ -31,6 +31,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "logger.h"
+#include "FreeRTOS.h"
+#include "task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,7 +53,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+extern osThreadId_t flowmeterHandle;
+extern osThreadId_t wheelSpeedHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -209,8 +212,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   /* USER CODE BEGIN Callback 1 */
   if (htim->Instance == TIM6) {
-	  flowmeterTask();
-	  wheelSpeedTask();
+	  BaseType_t higherPriorityTaskWoken = pdFALSE;
+
+	  vTaskNotifyGiveFromISR((TaskHandle_t)flowmeterTaskHandle,  &higherPriorityTaskWoken);
+	  vTaskNotifyGiveFromISR((TaskHandle_t)wheelSpeedTaskHandle, &higherPriorityTaskWoken);
+	  // If a woken task is higher priority than what we interrupted,
+	  // switch to it immediately when the ISR returns.
+	  portYIELD_FROM_ISR(higherPriorityTaskWoken);
   }
   /* USER CODE END Callback 1 */
 }
