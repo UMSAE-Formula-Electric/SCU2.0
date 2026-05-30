@@ -212,13 +212,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   /* USER CODE BEGIN Callback 1 */
   if (htim->Instance == TIM6) {
-	  BaseType_t higherPriorityTaskWoken = pdFALSE;
-
-	  vTaskNotifyGiveFromISR((TaskHandle_t)readFlowmeterHandle,  &higherPriorityTaskWoken);
-	  vTaskNotifyGiveFromISR((TaskHandle_t)readWheelSpeedHandle, &higherPriorityTaskWoken);
-	  // If a woken task is higher priority than what we interrupted,
-	  // switch to it immediately when the ISR returns.
-	  portYIELD_FROM_ISR(higherPriorityTaskWoken);
+      BaseType_t higherPriorityTaskWoken = pdFALSE;
+      if (readFlowmeterHandle != NULL) {
+          vTaskNotifyGiveFromISR((TaskHandle_t)readFlowmeterHandle,  &higherPriorityTaskWoken);
+      }
+      if (readWheelSpeedHandle != NULL) {
+          vTaskNotifyGiveFromISR((TaskHandle_t)readWheelSpeedHandle, &higherPriorityTaskWoken);
+      }
+      portYIELD_FROM_ISR(higherPriorityTaskWoken);
   }
   /* USER CODE END Callback 1 */
 }
