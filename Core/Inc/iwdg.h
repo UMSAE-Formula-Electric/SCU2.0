@@ -53,6 +53,13 @@ typedef enum {
     NUM_TASKS
 } TaskBit_t;
 
+/* How often StartWatchDogTask wakes to attempt a refresh, in milliseconds.
+ * IWDG_RELOAD_PERIOD is a reload-register count, NOT a time: with
+ * IWDG_PRESCALER_4 and the ~32 kHz LSI the counter runs at 8 kHz, so
+ * reload 4094 expires in ~512 ms. The LSI is only specified to 17-47 kHz,
+ * which pulls the worst case down to ~350 ms, so refresh well inside that. */
+#define IWDG_KICK_PERIOD_MS 100
+
 bool startFromIWDG();
 extern osEventFlagsId_t iwdgEventGroupHandle;
 void kickWatchdogBit(osThreadId_t taskHandle);

@@ -25,6 +25,12 @@
 #include "logger.h"
 #include "imu.h"
 #include "cmsis_os2.h"
+#include "iwdg.h"
+
+/* How long StartCanTxTask waits for work before looping to kick the watchdog */
+#define CAN_TX_QUEUE_WAIT_MS   50
+/* How long to wait for one of the 3 hardware mailboxes before giving up */
+#define CAN_TX_MAILBOX_WAIT_MS 5
 
 uint32_t TxMailbox;
 
@@ -155,14 +161,27 @@ void StartCanTxTask(void *argument){
     osStatus_t isMsgTakenFromQueue;
 
     for(;;){
-        isMsgTakenFromQueue = osMessageQueueGet(canTxPacketQueueHandle, &txPacket, 0, 0);
-        if (isMsgTakenFromQueue == osOK) {
-            if (HAL_CAN_AddTxMessage(&hcan2, &(txPacket.txPacketHeader), txPacket.txPacketData, &TxMailbox) != HAL_OK) {
-                logMessage("SCU couldn't send a message to the CAN Bus.\r\n", true);
-            }
-            else {
-                logMessage("SCU sent a message to the CAN Bus.\r\n", true);
-            }
+        kickWatchdogBit(osThreadGetId());
+
+        /* Block rather than poll. The old spin left this task permanently
+         * ready at osPriorityNormal, which starved every lower priority task
+         * and burned the CPU that the sensor tasks needed. Waking on a timeout
+         * keeps the watchdog bit set even when there is no CAN traffic. */
+        isMsgTakenFromQueue = osMessageQueueGet(canTxPacketQueueHandle, &txPacket, 0, CAN_TX_QUEUE_WAIT_MS);
+        if (isMsgTakenFromQueue != osOK) {
+            continue;
+        }
+
+        /* The packet is already off the queue, so a full mailbox set would
+         * destroy it. Wait for a mailbox instead of dropping the frame. */
+        uint32_t mailboxWaitMs = CAN_TX_MAILBOX_WAIT_MS;
+        while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan2) == 0 && mailboxWaitMs > 0) {
+            osDelay(1);
+            mailboxWaitMs--;
+        }
+
+        if (HAL_CAN_AddTxMessage(&hcan2, &(txPacket.txPacketHeader), txPacket.txPacketData, &TxMailbox) != HAL_OK) {
+            logMessage("SCU couldn't send a message to the CAN Bus.\r\n", true);
         }
     }
 }

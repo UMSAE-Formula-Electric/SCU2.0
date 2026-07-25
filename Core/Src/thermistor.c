@@ -17,6 +17,7 @@
 #include "string.h"
 #include "logger.h"
 #include "can.h"
+#include "iwdg.h"
 
 // STEINHART & HART Equation Coefficients
 const double A = 1.2794639360E-3;
@@ -103,6 +104,8 @@ void StartReadTempTask(void *argument){
     static char* buffer_pos = concatenatedTempMessages;
 
     for (;;){
+        kickWatchdogBit(osThreadGetId());
+
         if (newData_thermistor == 1) {
         	buffer_pos = concatenatedTempMessages;
         	*buffer_pos = '\0';
@@ -140,6 +143,8 @@ void StartReadTempTask(void *argument){
             newData_thermistor = 0;	// reset ADC conversion flag
             osDelay(pdMS_TO_TICKS(THERMISTOR_DELAY_MS));
        }
-       osThreadYield();
+
+       /* See StartReadShocksTask: a bare yield starves osPriorityLow tasks. */
+       osDelay(1);
    }
 }

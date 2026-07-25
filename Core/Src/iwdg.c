@@ -200,7 +200,7 @@ void StartWatchDogTask(void *argument) {
             xEventGroupClearBits(iwdgEventGroupHandle, IWDG_EVENT_ALL_ALLOWED_BITS);
         }
 
-        osDelay(IWDG_RELOAD_PERIOD / 2);                                       // Delay for IWDG_RELOAD_PERIOD
+        osDelay(IWDG_KICK_PERIOD_MS);                                                 // Re-check well inside the hardware timeout
     }
 }
 /* USER CODE END 1 */

@@ -187,7 +187,12 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* tim_icHandle)
     HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
   /* USER CODE BEGIN TIM1_MspInit 1 */
-
+    /* Input capture fires on TIM1_CC_IRQn, not the update line. Without this
+     * the capture flags were only serviced incidentally by the 1 ms TIM10 tick
+     * sharing TIM1_UP_TIM10_IRQn, capping the count at one pulse per channel
+     * per millisecond and under-reporting wheel speed. */
+    HAL_NVIC_SetPriority(TIM1_CC_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);
   /* USER CODE END TIM1_MspInit 1 */
   }
 }
@@ -307,30 +312,30 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
     // when interrupt is caused by timer 3
     if(htim->Instance == TIM1)
     {
-        if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {   // Front Left
+        if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {   // RR
             ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
             if (ICValue != 0) {
-            	wheel_FL_pulse_count++;
+            	wheel_RR_pulse_count++;
             }
         }
 
-        else if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2) { // Front Right
+        else if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2) { // RL
             ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
-            if (ICValue != 0) {
-            	wheel_FR_pulse_count++;
-            }
-        }
-
-        else if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3) { // Rear Left
-            ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3);
             if (ICValue != 0) {
             	wheel_RL_pulse_count++;
             }
         }
-        else if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4) { // Rear Right
+
+        else if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3) { // FR
+            ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3);
+            if (ICValue != 0) {
+            	wheel_FR_pulse_count++;
+            }
+        }
+        else if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4) { // FL
             ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_4);
             if (ICValue != 0) {
-            	wheel_RR_pulse_count++;
+            	wheel_FL_pulse_count++;
             }
         }
     }

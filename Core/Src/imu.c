@@ -9,6 +9,7 @@
 
 #include "imu.h"
 #include "cmsis_os.h"
+#include "iwdg.h"
 
 #define BUFFER_SIZE 128
 
@@ -203,6 +204,8 @@ void StartImuCanProcTask(void *argument)
     uint64_t packet;
     for (;;)
     {
+        kickWatchdogBit(osThreadGetId());
+
         // should probably check to make sure queues are in valid state
         packet = dequeueAccelerationPacket();
         // need to check if packet valid
