@@ -186,13 +186,15 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* tim_icHandle)
     /* TIM1 interrupt Init */
     HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
-  /* USER CODE BEGIN TIM1_MspInit 1 */
-    /* Input capture fires on TIM1_CC_IRQn, not the update line. Without this
-     * the capture flags were only serviced incidentally by the 1 ms TIM10 tick
-     * sharing TIM1_UP_TIM10_IRQn, capping the count at one pulse per channel
-     * per millisecond and under-reporting wheel speed. */
     HAL_NVIC_SetPriority(TIM1_CC_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);
+  /* USER CODE BEGIN TIM1_MspInit 1 */
+    /* NOTE: the TIM1_CC_IRQn enable above is generated from the .ioc and must
+     * stay enabled. Wheel speed input capture fires on the capture/compare
+     * line, not the update line. Without it the capture flags are only
+     * serviced incidentally by the 1 ms TIM10 tick sharing TIM1_UP_TIM10_IRQn,
+     * which caps the count at one pulse per channel per millisecond and
+     * under-reports wheel speed. Do not untick it in CubeMX. */
   /* USER CODE END TIM1_MspInit 1 */
   }
 }
@@ -262,6 +264,7 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* tim_icHandle)
 
     /* TIM1 interrupt Deinit */
     HAL_NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
+    HAL_NVIC_DisableIRQ(TIM1_CC_IRQn);
   /* USER CODE BEGIN TIM1_MspDeInit 1 */
 
   /* USER CODE END TIM1_MspDeInit 1 */
