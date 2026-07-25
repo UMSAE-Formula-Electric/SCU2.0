@@ -121,6 +121,11 @@ osMessageQueueId_t canTxPacketQueueHandle;
 const osMessageQueueAttr_t canTxPacketQueue_attributes = {
   .name = "canTxPacketQueue"
 };
+/* Definitions for uartMutex */
+osMutexId_t uartMutexHandle;
+const osMutexAttr_t uartMutex_attributes = {
+  .name = "uartMutex"
+};
 /* Definitions for iwdgEventGroup */
 osEventFlagsId_t iwdgEventGroupHandle;
 const osEventFlagsAttr_t iwdgEventGroup_attributes = {
@@ -153,6 +158,9 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
+  /* Create the mutex(es) */
+  /* creation of uartMutex */
+  uartMutexHandle = osMutexNew(&uartMutex_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -209,7 +217,6 @@ void MX_FREERTOS_Init(void) {
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
-  /* Create the event(s) */
   /* creation of iwdgEventGroup */
   iwdgEventGroupHandle = osEventFlagsNew(&iwdgEventGroup_attributes);
 

@@ -23,6 +23,7 @@
 #include "cmsis_os2.h"
 #include "logger.h"
 #include "can.h"
+#include "iwdg.h"
 
 // Shock Pot Variables and Macros
 #define SHOCK_POT_DELAY_MS 5
@@ -82,6 +83,8 @@ void StartReadShocksTask(void *argument){
     static char* buffer_pos = concatenatedDistanceMessages;
 
     for (;;){
+        kickWatchdogBit(osThreadGetId());
+
         if (newData_shock_pot == 1){
             // Array of voltages passed by reference
         	buffer_pos = concatenatedDistanceMessages;   // reset pointer
@@ -119,7 +122,10 @@ void StartReadShocksTask(void *argument){
             osDelay(pdMS_TO_TICKS(SHOCK_POT_DELAY_MS));
         }
 
-        osThreadYield();
+        /* osThreadYield() only yields to tasks of equal or higher priority, so
+         * spinning here left imuCanProcTask (osPriorityLow) permanently starved
+         * and unable to kick its watchdog bit. A short block lets it run. */
+        osDelay(1);
     }
 }
 

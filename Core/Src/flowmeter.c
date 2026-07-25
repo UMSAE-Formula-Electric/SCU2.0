@@ -29,6 +29,8 @@ const int PERIOD = 1000;													// time in ms
 
 #define UART_TIMEOUT_MS 50
 
+extern osMutexId_t uartMutexHandle;										// serializes access to husart2 between tasks
+
 static const double conversionFactor = (1000/PERIOD)*(1.0/1000.0);		// convert L/s to m^3/s
 
 //*********************************************************************
@@ -64,9 +66,10 @@ void flowmeterTask(void){
   	double flowrate = (double)flowmeter_pulse_count/(double)PPL;
 
   	//====================== CAN Messaging ======================
-  	// TODO: Array is 2 bytes, but sendCan transmits 8.
-	// Either change array to `uint8_t flowmeterCanData[8] = {0};` or change sendCan length to 2
-    uint8_t flowmeterCanData[2];
+  	/* convertFlowrateToCAN only writes the low 2 bytes, but the frame is sent
+  	 * with DLC 8, so the buffer must be 8 bytes. It was 2, which made
+  	 * buildTxPacket read 6 bytes past the end of the stack array. */
+    uint8_t flowmeterCanData[8] = {0};
     convertFlowrateToCAN(flowrate,flowmeterCanData);
     uint8_t sendStatus = sendCan(&hcan2,flowmeterCanData,8,FLOW_METER_CAN_ID,CAN_RTR_DATA,0);
     if(sendStatus != 0x0)
@@ -76,6 +79,8 @@ void flowmeterTask(void){
     //===========================================================
 
     //---------------------- Debug Logging ----------------------
+  	osMutexAcquire(uartMutexHandle, osWaitForever);		// block until the UART is free
+
   	char ms[50];
   	snprintf(ms, sizeof(ms), "Flowmeter pulse count %d: %lu \r\n",i, flowmeter_pulse_count);
   	HAL_USART_Transmit(&husart2, (uint8_t*)ms, strlen(ms), UART_TIMEOUT_MS);
@@ -83,6 +88,8 @@ void flowmeterTask(void){
   	char msg[50];
   	snprintf(msg, sizeof(msg), "Flowrate %d: %.4f \r\n",i, flowrate);
   	HAL_USART_Transmit(&husart2, (uint8_t*)msg, strlen(msg), UART_TIMEOUT_MS);
+
+  	osMutexRelease(uartMutexHandle);
   	i = i + 1;
   	//-----------------------------------------------------------
 }

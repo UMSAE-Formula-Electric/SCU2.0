@@ -16,6 +16,7 @@
 #include "string.h"
 #include "logger.h"
 #include "can.h"
+#include "iwdg.h"
 
 //Brake Temp Variables and Macros
 #define NUM_BRAKE_TEMP_SENSORS 4
@@ -81,6 +82,8 @@ void StartReadBrakeTempTask(void *argument){
     static char* buffer_pos = concatenatedTempMessages;
 
 	for(;;){
+		kickWatchdogBit(osThreadGetId());
+
 		validTemps = true;
 		brakeTemps[0] = readThermocouples(GPIOD,GPIO_PIN_8);//Brake Temp 1 Chip Select PD8
 		brakeTemps[1] = readThermocouples(GPIOD,GPIO_PIN_9);//Brake Temp 2 Chip Select PD9
