@@ -55,8 +55,8 @@ double calculateWheelSpeed(int pulse_count, int numTeeth){
 void wheelSpeedTask(void) {
 	double wheelSpeeds[NUM_WHEELSPEEDS];
 
-	wheelSpeeds[0] = calculateWheelSpeed(wheel_FL_pulse_count,NUM_TEETH_FRONT);//FL PA8
-	wheelSpeeds[1] = calculateWheelSpeed(wheel_FR_pulse_count,NUM_TEETH_FRONT);//FR PA9
+	wheelSpeeds[0] = calculateWheelSpeed(wheel_FR_pulse_count,NUM_TEETH_FRONT);//FR PA9
+	wheelSpeeds[1] = CalculateWheelSpeed(wheel_FL_pulse_count,NUM_TEETH_FRONT);//FL PA8
 	wheelSpeeds[2] = calculateWheelSpeed(wheel_RL_pulse_count,NUM_TEETH_BACK);//RL PA10
 	wheelSpeeds[3] = calculateWheelSpeed(wheel_RR_pulse_count,NUM_TEETH_BACK);//RR PA11
 
