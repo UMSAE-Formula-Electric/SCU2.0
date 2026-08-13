@@ -67,7 +67,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     # Add user defined libraries
 )
 
-# Sources CubeMX does not generate. See CMAKE_SETUP.md.
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/brake_temp.c
     Core/Src/flowmeter.c

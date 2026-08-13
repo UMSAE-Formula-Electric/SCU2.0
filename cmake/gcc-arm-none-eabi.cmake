@@ -42,17 +42,6 @@ set(CMAKE_C_LINK_FLAGS "${TARGET_FLAGS}")
 set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -T \"${CMAKE_SOURCE_DIR}/STM32F446VETx_FLASH.ld\"")
 set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} --specs=nano.specs")
 set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -Wl,-Map=${CMAKE_PROJECT_NAME}.map -Wl,--gc-sections")
-# PATCHED (not ST default): the library group was moved out of here.
-#
-# CMake emits CMAKE_C_LINK_FLAGS BEFORE the object files, so -lc was scanned
-# first and newlib's libc_a-lock.o got linked ahead of our
-# Core/ThreadSafe/newlib_lock_glue.c, producing "multiple definition of
-# __retarget_lock_*". The Eclipse build put the group AFTER the objects.
-#
-# The group is now applied via target_link_libraries() in the root
-# CMakeLists.txt, which CMake places after the objects - matching Eclipse.
-#
-# NOTE: re-apply this if CubeMX ever regenerates this file.
 set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -Wl,--print-memory-usage")
 
 set(CMAKE_CXX_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -Wl,--start-group -lstdc++ -lsupc++ -Wl,--end-group")
