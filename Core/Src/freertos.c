@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "can.h"
 #include "usart.h"
+#include <string.h>  /* strlen - implicit declaration is an error from GCC 14 */
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

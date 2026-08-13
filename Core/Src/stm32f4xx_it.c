@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "usart.h"
+#include <stdio.h>   /* snprintf - implicit declaration is an error from GCC 14 */
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
