@@ -56,8 +56,6 @@ void MX_CAN2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 void convertDoubleToCAN(double *value, uint8_t *canData);
-/* Defined in can.c but was never declared here; flowmeter.c relied on an
- * implicit declaration, which is a hard error from GCC 14 onward. */
 void convertFlowrateToCAN(double value, uint8_t *canData);
 /* USER CODE END Prototypes */
 

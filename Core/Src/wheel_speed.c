@@ -12,7 +12,7 @@
 #include "cmsis_os.h"
 #include "logger.h"
 #include "can.h"
-#include <string.h>  /* strlen - implicit declaration is an error from GCC 14 */
+#include <string.h>
 
 //Wheel Speed Variables and Macros
 #define WHEEL_DIAMETER		0.406						// In meters

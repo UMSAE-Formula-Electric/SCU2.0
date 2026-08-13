@@ -22,15 +22,9 @@
 !Makefile
 *~
 
-# Eclipse / STM32CubeIDE managed-build output.
-# Anchored with a leading slash: the old unanchored "Debug" pattern matched a
-# directory named Debug at ANY depth, so it silently swallowed build/Debug
-# while leaving build/Release, build/Gcc12 etc. tracked.
+# Build output
 /Debug/
 /Release/
-
-# CMake build output. CMakePresets.json uses build/<presetName>/, so this must
-# cover the whole tree rather than one preset name.
 /build/
 cmake-build-*
 
