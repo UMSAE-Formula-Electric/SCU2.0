@@ -30,13 +30,6 @@ cd SCU2.0
 git submodule update --init --recursive
 ```
 
-## Building the code
-The code is built using STM32CubeIDE.
-
-### Prerequisites
-- STM32CubeIDE
-- STM32CubeMX (optional)
-
 ## Documentation
 [Documentation](https://docs.google.com/document/d/1yh-vWpTT_wejGpQy9ZQ7YVPmWP_CSU35yJfaNo2MAhA/edit?usp=drive_link)
 
