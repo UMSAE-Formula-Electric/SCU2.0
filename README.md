@@ -32,14 +32,9 @@ git submodule update --init --recursive
 
 ## Building and Flashing (New CMake Setup)
 
-Author: Cedric Caparas
-Date: August 13, 2026
-
-# SCU build setup
-
 The SCU builds with CMake. CubeMX and CubeIDE work the same as before.
 
-## 1. Install STM32CubeCLT
+### 1. Install STM32CubeCLT
 
 On Teams. Software System>Software Resources>Important Software
 Open a new terminal and check:
@@ -56,13 +51,13 @@ C:\ST\STM32CubeCLT_<version>\CMake\bin
 C:\ST\STM32CubeCLT_<version>\Ninja\bin
 ```
 
-## 2. Get the code
+### 2. Get the code
 
 ```bash
 git submodule update --init --recursive
 ```
 
-## 3. Build from the command line
+### 3. Build from the command line
 
 ```bash
 cmake --preset Debug && cmake --build build/Debug
@@ -72,10 +67,11 @@ cmake --preset Debug && cmake --build build/Debug
 cmake --preset Release && cmake --build build/Release
 ```
 
-Output is in `build/<config>/`. Re-run the `--preset` step only when
-`CMakeLists.txt` changes.
+Output is in `build/<config>/`. Ninja re-runs CMake by itself when
+`CMakeLists.txt` changes, so after the first configure you only need the build
+command.
 
-## 4. Build from CubeIDE
+### 4. Build from CubeIDE
 
 Re-import the project once:
 
@@ -89,7 +85,7 @@ Set these per configuration:
 | Tab | Setting |
 |---|---|
 | CMake Settings > Build directory | `build/Debug` or `build/Release` |
-| CMake Settings > Other options | `-G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/gcc-arm-none-eabi.cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON` |
+| CMake Settings > Other options | `-G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON` |
 | Behavior > Build arguments | `-C build/Debug` or `-C build/Release` |
 | Builder Settings > Build command | `ninja` |
 | Environment > PATH | prepend CubeCLT's `GNU-tools-for-STM32\bin`, `Ninja\bin`, `CMake\bin` |
@@ -100,7 +96,7 @@ The PATH step is required. Without it CubeIDE uses its own older GCC and your
 binary differs from everyone else's. It lives in `.settings/` which is
 gitignored, so everyone sets it once.
 
-## 5. Flashing Debug
+### 5. Flashing Debug
 
 ```bash
 STM32_Programmer_CLI -c port=SWD -w build/Debug/SCU2.0.hex -rst
@@ -108,19 +104,19 @@ STM32_Programmer_CLI -c port=SWD -w build/Debug/SCU2.0.hex -rst
 
 Or use a CubeIDE debug config pointed at `build/Debug/SCU2.0.elf`.
 
-## Adding source files
+### Adding source files
 
 Add them to `target_sources()` in the root `CMakeLists.txt`. CubeMX only tracks
 files it generates.
 
 Do not edit `cmake/stm32cubemx/CMakeLists.txt`, CubeMX overwrites it.
 
-## Debug vs Release
+### Debug vs Release
 
 Debug is `-O0 -g3`, Release is `-Os`. Use Debug on the bench, Release on the
 car. Test Release separately, optimization changes timing and stack usage.
 
-## Troubleshooting
+### Troubleshooting
 
 Build folder is disposable:
 

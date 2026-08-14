@@ -34,6 +34,14 @@ enable_language(C ASM)
 project(${CMAKE_PROJECT_NAME})
 message("Build type: " ${CMAKE_BUILD_TYPE})
 
+if(CMAKE_C_COMPILER_VERSION VERSION_LESS 14.0)
+    message(FATAL_ERROR
+        "arm-none-eabi-gcc ${CMAKE_C_COMPILER_VERSION} is too old, need 14.0+.\n"
+        "  Found: ${CMAKE_C_COMPILER}\n"
+        "  This is usually STM32CubeIDE's bundled toolchain winning over "
+        "STM32CubeCLT on PATH. See CMAKE_SETUP.md.")
+endif()
+
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
 
@@ -104,7 +112,8 @@ target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
     "SHELL:-u _scanf_float"
 )
 
-set(CMAKE_C_FLAGS_RELEASE "-Os -DNDEBUG")
+set(CMAKE_C_FLAGS_DEBUG "-O0 -g3")
+set(CMAKE_C_FLAGS_RELEASE "-Os -g0 -DNDEBUG")
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
     -Wl,--start-group c m -Wl,--end-group
