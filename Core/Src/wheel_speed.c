@@ -12,6 +12,7 @@
 #include "cmsis_os.h"
 #include "logger.h"
 #include "can.h"
+#include <string.h>
 
 //Wheel Speed Variables and Macros
 #define WHEEL_DIAMETER		0.406						// In meters
@@ -55,10 +56,10 @@ double calculateWheelSpeed(int pulse_count, int numTeeth){
 void wheelSpeedTask(void) {
 	double wheelSpeeds[NUM_WHEELSPEEDS];
 
-	wheelSpeeds[0] = calculateWheelSpeed(wheel_FL_pulse_count,NUM_TEETH_FRONT);//FL PA8
-	wheelSpeeds[1] = calculateWheelSpeed(wheel_FR_pulse_count,NUM_TEETH_FRONT);//FR PA9
-	wheelSpeeds[2] = calculateWheelSpeed(wheel_RL_pulse_count,NUM_TEETH_BACK);//RL PA10
-	wheelSpeeds[3] = calculateWheelSpeed(wheel_RR_pulse_count,NUM_TEETH_BACK);//RR PA11
+	wheelSpeeds[0] = calculateWheelSpeed(wheel_FL_pulse_count,NUM_TEETH_FRONT);//FL PA11 TIM1_CH4
+	wheelSpeeds[1] = calculateWheelSpeed(wheel_FR_pulse_count,NUM_TEETH_FRONT);//FR PA10 TIM1_CH3
+	wheelSpeeds[2] = calculateWheelSpeed(wheel_RL_pulse_count,NUM_TEETH_BACK);//RL PA9 TIM1_CH2
+	wheelSpeeds[3] = calculateWheelSpeed(wheel_RR_pulse_count,NUM_TEETH_BACK);//RR PA8 TIM1_CH1
 
 	//====================== CAN Messaging ======================
     uint8_t wheelSpeedCanData[8];

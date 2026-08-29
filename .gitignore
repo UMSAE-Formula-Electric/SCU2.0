@@ -22,9 +22,16 @@
 !Makefile
 *~
 
-# Debug
-Debug
+# Build output
+/Debug/
+/Release/
+/build/
 cmake-build-*
+
+# CubeMX regenerates these at the root, the build uses Core/ThreadSafe/
+/newlib_lock_glue.c
+/stm32_lock.h
+
 *.launch
 
 .idea

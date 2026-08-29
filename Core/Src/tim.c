@@ -176,7 +176,7 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* tim_icHandle)
     PA10     ------> TIM1_CH3
     PA11     ------> TIM1_CH4
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11;
+    GPIO_InitStruct.Pin = RR_WHEEL_S_Pin|RL_WHEEL_S_Pin|FR_WHEEL_S_Pin|FL_WHEEL_S_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -260,7 +260,7 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* tim_icHandle)
     PA10     ------> TIM1_CH3
     PA11     ------> TIM1_CH4
     */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11);
+    HAL_GPIO_DeInit(GPIOA, RR_WHEEL_S_Pin|RL_WHEEL_S_Pin|FR_WHEEL_S_Pin|FL_WHEEL_S_Pin);
 
     /* TIM1 interrupt Deinit */
     HAL_NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);

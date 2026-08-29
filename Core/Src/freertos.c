@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "can.h"
 #include "usart.h"
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

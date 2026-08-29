@@ -56,6 +56,7 @@ void MX_CAN2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 void convertDoubleToCAN(double *value, uint8_t *canData);
+void convertFlowrateToCAN(double value, uint8_t *canData);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

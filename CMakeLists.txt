@@ -1,73 +1,133 @@
-#THIS FILE IS AUTO GENERATED FROM THE TEMPLATE! DO NOT CHANGE!
-set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_SYSTEM_VERSION 1)
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.22)
 
-# specify cross-compilers and tools
-set(CMAKE_C_COMPILER arm-none-eabi-gcc)
-set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
-set(CMAKE_ASM_COMPILER  arm-none-eabi-gcc)
-set(CMAKE_AR arm-none-eabi-ar)
-set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
-set(CMAKE_OBJDUMP arm-none-eabi-objdump)
-set(SIZE arm-none-eabi-size)
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+#
+# This file is generated only once,
+# and is not re-generated if converter is called multiple times.
+#
+# User is free to modify the file as much as necessary
+#
 
-# project settings
-project(SCU2.0 C CXX ASM)
-set(CMAKE_CXX_STANDARD 17)
+# Setup compiler settings
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS ON)
 
-#Uncomment for hardware floating point
-add_compile_definitions(ARM_MATH_CM4;ARM_MATH_MATRIX_CHECK;ARM_MATH_ROUNDING)
-add_compile_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
-add_link_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
 
-#Uncomment for software floating point
-#add_compile_options(-mfloat-abi=soft)
+# Define the build type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug")
+endif()
 
-add_compile_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
-add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-length=0)
+# Set the project name
+set(CMAKE_PROJECT_NAME SCU2.0)
 
-# uncomment to mitigate c++17 absolute addresses warnings
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-register")
+# Include toolchain file
+include("cmake/gcc-arm-none-eabi.cmake")
 
-# Enable assembler files preprocessing
-add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
+# Enable compile command to ease indexing with e.g. clangd
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    message(STATUS "Maximum optimization for speed")
-    add_compile_options(-Ofast)
-elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-    message(STATUS "Maximum optimization for speed, debug info included")
-    add_compile_options(-Ofast -g)
-elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel")
-    message(STATUS "Maximum optimization for size")
-    add_compile_options(-Os)
-else ()
-    message(STATUS "Minimal optimization, debug info included")
-    add_compile_options(-Og -g)
-endif ()
+# Enable CMake support for ASM and C languages
+enable_language(C ASM)
 
-include_directories(Core/Inc Firmware-Library/Inc Drivers/STM32F4xx_HAL_Driver/Inc Drivers/STM32F4xx_HAL_Driver/Inc/Legacy Middlewares/Third_Party/FreeRTOS/Source/include Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F Drivers/CMSIS/Device/ST/STM32F4xx/Include Drivers/CMSIS/Include Core/ThreadSafe Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2)
+# Core project settings
+project(${CMAKE_PROJECT_NAME})
+message("Build type: " ${CMAKE_BUILD_TYPE})
 
-add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -DSTM32_THREAD_SAFE_STRATEGY=4)
+if(CMAKE_C_COMPILER_VERSION VERSION_LESS 14.0)
+    message(FATAL_ERROR
+        "arm-none-eabi-gcc ${CMAKE_C_COMPILER_VERSION} is too old, need 14.0+.\n"
+        "  Found: ${CMAKE_C_COMPILER}\n"
+        "  This is usually STM32CubeIDE's bundled toolchain winning over "
+        "STM32CubeCLT on PATH. See CMAKE_SETUP.md.")
+endif()
 
-file(GLOB_RECURSE SOURCES "Core/*.*" "Firmware-Library/*.*" "Middlewares/*.*" "Drivers/*.*")
+# Create an executable object type
+add_executable(${CMAKE_PROJECT_NAME})
 
-set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F446VETX_FLASH.ld)
+# Add STM32CubeMX generated sources
+add_subdirectory(cmake/stm32cubemx)
 
-add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
-add_link_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
-add_link_options(-T ${LINKER_SCRIPT})
+# Link directories setup
+target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
+    # Add user defined library search paths
+)
 
-add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
+# Add sources to executable
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+    # Add user sources here
+)
 
-set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
-set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)
+# Add include paths
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
+    # Add user defined include paths
+)
 
-add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
-        COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
-        COMMENT "Building ${HEX_FILE}
-Building ${BIN_FILE}")
+# Add project symbols (macros)
+target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
+    # Add user defined symbols
+)
+
+# Add linked libraries
+target_link_libraries(${CMAKE_PROJECT_NAME}
+    stm32cubemx
+
+    # Add user defined libraries
+)
+
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+    Core/Src/brake_temp.c
+    Core/Src/flowmeter.c
+    Core/Src/imu.c
+    Core/Src/shock_pot.c
+    Core/Src/thermistor.c
+    Core/Src/wheel_speed.c
+    Core/ThreadSafe/newlib_lock_glue.c
+)
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE Core/ThreadSafe)
+
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/Firmware-Library/Src/can_utils.c")
+    message(FATAL_ERROR
+        "Firmware-Library submodule is empty. Run:\n"
+        "  git submodule update --init --recursive")
+endif()
+
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+    Firmware-Library/Src/bms_can_utils.c
+    Firmware-Library/Src/can_utils.c
+    Firmware-Library/Src/car_state.c
+    Firmware-Library/Src/error_handler.c
+    Firmware-Library/Src/logger.c
+    Firmware-Library/Src/motor_controller_can_utils.c
+)
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE Firmware-Library/Inc)
+
+target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
+    --specs=nano.specs
+    -fstack-usage
+)
+
+target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
+    "SHELL:-u _printf_float"
+    "SHELL:-u _scanf_float"
+)
+
+set(CMAKE_C_FLAGS_DEBUG "-O0 -g3")
+set(CMAKE_C_FLAGS_RELEASE "-Os -g0 -DNDEBUG")
+
+target_link_libraries(${CMAKE_PROJECT_NAME}
+    -Wl,--start-group c m -Wl,--end-group
+)
+
+if(NOT CMAKE_SIZE)
+    find_program(CMAKE_SIZE NAMES arm-none-eabi-size REQUIRED)
+endif()
+
+add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
+    COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
+            ${CMAKE_PROJECT_NAME}.hex
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
+            ${CMAKE_PROJECT_NAME}.bin
+    COMMENT "Size report + generating .hex and .bin"
+)

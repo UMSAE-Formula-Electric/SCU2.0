@@ -128,8 +128,8 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PDPin PDPin PDPin PDPin */
-  GPIO_InitStruct.Pin = RR_WHEEL_S_Pin|RL_WHEEL_S_Pin|FR_WHEEL_S_Pin|FL_WHEEL_S_Pin;
+  /*Configure GPIO pins : PD0 PD1 PD3 PD4 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_3|GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
